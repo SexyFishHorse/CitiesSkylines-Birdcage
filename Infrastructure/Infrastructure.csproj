@@ -52,7 +52,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\ConfigStore.cs" />
+    <Compile Include="Configuration\IConfigStore.cs" />
     <Compile Include="Configuration\IModWithOptionsPanel.cs" />
+    <Compile Include="Configuration\ModConfiguration.cs" />
     <Compile Include="IO\GamePaths.cs" />
     <Compile Include="IO\GameFolder.cs" />
     <Compile Include="IO\FolderPathAttribute.cs" />
