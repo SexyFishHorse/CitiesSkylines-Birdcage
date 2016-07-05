@@ -3,10 +3,13 @@
     using ColossalFramework.UI;
     using ICities;
     using SexyFishHorse.CitiesSkylines.Infrastructure;
+    using SexyFishHorse.CitiesSkylines.Infrastructure.Configuration;
 
     public class BirdcageUserMod : IUserModWithOptionsPanel
     {
         private readonly IOptionsController optionsController;
+
+        private readonly ConfigStore configStore;
 
         public BirdcageUserMod()
         {
@@ -35,7 +38,7 @@
                 (UIButton)
                 uiHelper.AddCheckbox(
                     "Hide chirper", 
-                    optionsController.GetSetting<bool>("HideChirper"), 
+                    configStore.GetSetting<bool>("HideChirper"), 
                     optionsController.HideChirper());
         }
     }

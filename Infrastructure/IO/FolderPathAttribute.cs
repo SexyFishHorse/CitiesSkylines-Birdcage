@@ -2,14 +2,14 @@
 {
     using System;
 
-    public class ModFolderPathAttribute : Attribute
+    public class FolderPathAttribute : Attribute
     {
-        public ModFolderPathAttribute(string path)
+        public FolderPathAttribute(string path)
             : this(new[] { path })
         {
         }
 
-        public ModFolderPathAttribute(string[] paths)
+        public FolderPathAttribute(string[] paths)
         {
             Paths = paths;
         }
