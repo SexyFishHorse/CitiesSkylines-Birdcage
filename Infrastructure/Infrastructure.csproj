@@ -20,6 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -46,6 +47,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\ConfigStore.cs" />
+    <Compile Include="Configuration\IModWithOptionsPanel.cs" />
+    <Compile Include="IO\CitiesSkylinesPaths.cs" />
+    <Compile Include="IO\ModFolder.cs" />
+    <Compile Include="IO\ModFolderPathAttribute.cs" />
     <Compile Include="IUserModWithOptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

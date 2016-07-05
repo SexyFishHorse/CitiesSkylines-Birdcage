@@ -1,24 +1,42 @@
 ﻿namespace SexyFishHorse.CitiesSkylines.Birdcage
 {
-    using System;
+    using ColossalFramework.UI;
     using ICities;
     using SexyFishHorse.CitiesSkylines.Infrastructure;
 
     public class BirdcageUserMod : IUserModWithOptionsPanel
     {
-        public string Name
+        private readonly IOptionsController optionsController;
+
+        public BirdcageUserMod()
         {
-            get { return "Birdcage"; }
+            optionsController = new OptionsController();
         }
 
         public string Description
         {
-            get { return "More Chirper controls"; }
+            get
+            {
+                return "More Chirper controls";
+            }
+        }
+
+        public string Name
+        {
+            get
+            {
+                return "Birdcage";
+            }
         }
 
         public void OnSettingsUI(UIHelperBase uiHelper)
         {
-            throw new NotImplementedException();
+            var hideChirperButton =
+                (UIButton)
+                uiHelper.AddCheckbox(
+                    "Hide chirper", 
+                    optionsController.GetSetting<bool>("HideChirper"), 
+                    optionsController.HideChirper());
         }
     }
 }
