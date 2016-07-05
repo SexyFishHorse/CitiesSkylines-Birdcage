@@ -46,6 +46,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IO\CitiesSkylinesPaths.cs" />
+    <Compile Include="IO\ModFolder.cs" />
+    <Compile Include="IO\ModFolderPathAttribute.cs" />
     <Compile Include="IUserModWithOptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
