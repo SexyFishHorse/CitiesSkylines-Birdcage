@@ -10,6 +10,11 @@
             throw new NotImplementedException();
         }
 
+        public void RemoveSetting(string key)
+        {
+            throw new NotImplementedException();
+        }
+
         public void SaveSetting<T>(string key, T value)
         {
             throw new NotImplementedException();
