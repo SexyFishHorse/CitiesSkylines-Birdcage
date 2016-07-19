@@ -1,14 +1,18 @@
 ﻿namespace SexyFishHorse.CitiesSkylines.Infrastructure.Configuration
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
-    using JetBrains.Annotations;
-    using Newtonsoft.Json;
+    using System.Linq;
+    using System.Xml.Serialization;
     using SexyFishHorse.CitiesSkylines.Infrastructure.IO;
+    using SexyFishHorse.CitiesSkylines.Infrastructure.Validation.Arguments;
 
     public class ConfigStore : IConfigStore
     {
-        public const string ConfigFileName = "ModConfiguration.json";
+        public const string ConfigFileName = "ModConfiguration.xml";
+
+        private XmlSerializer serializer;
 
         public ConfigStore(string modFolderName)
         {
@@ -18,20 +22,21 @@
             Directory.CreateDirectory(modFolderPath);
 
             ConfigFileInfo = new FileInfo(Path.Combine(modFolderPath, ConfigFileName));
+
+            serializer = new XmlSerializer(typeof(ModConfiguration));
         }
 
         public FileInfo ConfigFileInfo { get; private set; }
 
         public T GetSetting<T>(string key)
         {
-            EnforceKeyIsValid(key);
+            key.ShouldNotBeNull("key");
 
             var modConfiguration = LoadConfigFromFile();
 
-            object value;
-            if (modConfiguration.Settings.TryGetValue(key, out value))
+            if (modConfiguration.Settings.Any(x => x.Key == key))
             {
-                return (T)value;
+                return (T)modConfiguration.Settings.Single(x => x.Key == key).Value;
             }
 
             return default(T);
@@ -39,40 +44,34 @@
 
         public void RemoveSetting(string key)
         {
-            EnforceKeyIsValid(key);
+            key.ShouldNotBeNull("key");
 
             var config = LoadConfigFromFile();
 
-            config.Settings.Remove(key);
+            config.Settings.Remove(config.Settings.Find(x => x.Key == key));
 
             SaveConfigToFile(config);
         }
 
         public void SaveSetting<T>(string key, T value)
         {
-            EnforceKeyIsValid(key);
+            key.ShouldNotBeNull("key");
 
             if (value == null)
             {
-                throw new ArgumentNullException(
-                    "value", 
-                    string.Format("The configuration value for the key {0} is null. Use RemoveSetting to remove a value", key));
+                var message =
+                    string.Format(
+                        "The configuration value for the key {0} is null. Use RemoveSetting to remove a value",
+                        key);
+
+                throw new ArgumentNullException("value", message);
             }
 
             var modConfiguration = LoadConfigFromFile();
 
-            modConfiguration.Settings.Add(key, value);
+            modConfiguration.Settings.Add(new KeyValuePair<string, object>(key, value));
 
             SaveConfigToFile(modConfiguration);
-        }
-
-        [AssertionMethod]
-        private static void EnforceKeyIsValid([AssertionCondition(AssertionConditionType.IS_NOT_NULL)] string key)
-        {
-            if (string.IsNullOrEmpty(key))
-            {
-                throw new ArgumentException("The config key is invalid", "key");
-            }
         }
 
         private ModConfiguration LoadConfigFromFile()
@@ -83,24 +82,18 @@
             }
 
             using (var fileStream = ConfigFileInfo.OpenRead())
-            using (var streamReader = new StreamReader(fileStream))
             {
-                var fileContent = streamReader.ReadToEnd();
+                var config = serializer.Deserialize(fileStream) as ModConfiguration;
 
-                return JsonConvert.DeserializeObject<ModConfiguration>(fileContent);
+                return config ?? new ModConfiguration();
             }
         }
 
         private void SaveConfigToFile(ModConfiguration modConfiguration)
         {
             using (var fileStream = ConfigFileInfo.Open(FileMode.OpenOrCreate, FileAccess.Write))
-            using (var streamWriter = new StreamWriter(fileStream))
-            using (var jsonWriter = new JsonTextWriter(streamWriter))
             {
-                jsonWriter.Formatting = Formatting.Indented;
-
-                var serializer = new JsonSerializer();
-                serializer.Serialize(jsonWriter, modConfiguration);
+                serializer.Serialize(fileStream, modConfiguration);
             }
         }
     }
