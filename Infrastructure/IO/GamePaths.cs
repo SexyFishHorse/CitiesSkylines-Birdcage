@@ -19,13 +19,15 @@
             var colossalOrderPath = Path.Combine(localAppDataPath, ColossalOrderFolderName);
             var citiesSkylinesPath = Path.Combine(colossalOrderPath, CitiesSkylinesFolderName);
 
-            var attribute =
+            var pathAttribute =
                 gameFolder.GetType()
-                         .GetCustomAttributes(typeof(FolderPathAttribute), false)
-                         .Cast<FolderPathAttribute>()
-                         .Single();
+                          .GetMember(gameFolder.ToString())
+                          .Single()
+                          .GetCustomAttributes(typeof(FolderPathAttribute), false)
+                          .Cast<FolderPathAttribute>()
+                          .Single();
 
-            return attribute.Paths.Aggregate(citiesSkylinesPath, Path.Combine);
+            return pathAttribute.Paths.Aggregate(citiesSkylinesPath, Path.Combine);
         }
     }
 }

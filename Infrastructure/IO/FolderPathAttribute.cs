@@ -2,6 +2,7 @@
 {
     using System;
 
+    [AttributeUsage(AttributeTargets.Field)]
     public class FolderPathAttribute : Attribute
     {
         public FolderPathAttribute(string path)
