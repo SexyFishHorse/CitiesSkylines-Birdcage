@@ -59,6 +59,7 @@
     <Compile Include="BirdcageUserMod.cs" />
     <Compile Include="IOptionsController.cs" />
     <Compile Include="OptionsController.cs" />
+    <Compile Include="Options\OptionsUiController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
