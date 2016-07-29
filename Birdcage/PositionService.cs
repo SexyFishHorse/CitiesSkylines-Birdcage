@@ -12,7 +12,45 @@
 
         public UIView UiView { get; set; }
 
-        public ChirperAnchor CalculateChirperAnchor()
+        public void Dragging()
+        {
+            ChirpPanel.instance.Collapse();
+            var mousePosition = GetMouseGuiPosition();
+
+            mousePosition = EnsurePositionIsOnScreen(mousePosition);
+
+            Chirper.builtinChirperPosition = mousePosition;
+        }
+
+        public bool IsMouseOnChirper()
+        {
+            var mouseGuiPos = GetMouseGuiPosition();
+
+            var pointAndChirperMagnitude = mouseGuiPos - Chirper.builtinChirperPosition;
+
+            return pointAndChirperMagnitude.magnitude < 35;
+        }
+
+        public void ResetPosition()
+        {
+            Chirper.builtinChirperPosition = DefaultPosition;
+            Chirper.SetBuiltinChirperAnchor(ChirperAnchor.TopCenter);
+        }
+
+        public void UpdateChirperAnchor()
+        {
+            Chirper.SetBuiltinChirperAnchor(CalculateAnchor());
+        }
+
+        public void UpdateChirperPosition(Vector2 chirperPosition)
+        {
+            chirperPosition = EnsurePositionIsOnScreen(chirperPosition);
+
+            Chirper.builtinChirperPosition = chirperPosition;
+            UpdateChirperAnchor();
+        }
+
+        private ChirperAnchor CalculateAnchor()
         {
             var thirdOfUiWidth = UiView.GetScreenResolution().x / 3;
             var halfUiHeight = UiView.GetScreenResolution().y / 2;
@@ -43,7 +81,7 @@
             return anchor;
         }
 
-        public Vector2 EnsurePositionIsOnScreen(Vector2 mousePosition)
+        private Vector2 EnsurePositionIsOnScreen(Vector2 mousePosition)
         {
             if (mousePosition.x < 25)
             {
@@ -68,7 +106,7 @@
             return mousePosition;
         }
 
-        public Vector2 GetMouseGuiPosition()
+        private Vector2 GetMouseGuiPosition()
         {
             var mouseWorldPos = Camera.current.ScreenToWorldPoint(Input.mousePosition);
             var mouseGuiPos = UiView.WorldPointToGUI(UiView.uiCamera, mouseWorldPos);

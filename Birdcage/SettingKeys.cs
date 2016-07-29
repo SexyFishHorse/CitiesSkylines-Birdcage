@@ -2,8 +2,6 @@
 {
     public static class SettingKeys
     {
-        public const string ChirperAnchor = "ChirperAnchor";
-
         public const string ChirperPositionX = "ChirperPositionX";
 
         public const string ChirperPositionY = "ChirperPositionY";
