@@ -6,6 +6,16 @@
 
     public class PositionService
     {
+        private const int ChirperBottomBound = 160;
+
+        private const int ChirperLeftBound = 25;
+
+        private const int ChirperPositionMagnitude = 35;
+
+        private const int ChirperRightBound = 40;
+
+        private const int ChirperTopBound = 30;
+
         public IChirper Chirper { get; set; }
 
         public Vector2 DefaultPosition { get; set; }
@@ -28,7 +38,7 @@
 
             var pointAndChirperMagnitude = mouseGuiPos - Chirper.builtinChirperPosition;
 
-            return pointAndChirperMagnitude.magnitude < 35;
+            return pointAndChirperMagnitude.magnitude < ChirperPositionMagnitude;
         }
 
         public void ResetPosition()
@@ -83,24 +93,24 @@
 
         private Vector2 EnsurePositionIsOnScreen(Vector2 mousePosition)
         {
-            if (mousePosition.x < 25)
+            if (mousePosition.x < ChirperLeftBound)
             {
-                mousePosition.x = 25;
+                mousePosition.x = ChirperLeftBound;
             }
 
-            if (mousePosition.x > UiView.GetScreenResolution().x - 40)
+            if (mousePosition.x > UiView.GetScreenResolution().x - ChirperRightBound)
             {
-                mousePosition.x = UiView.GetScreenResolution().x - 40;
+                mousePosition.x = UiView.GetScreenResolution().x - ChirperRightBound;
             }
 
-            if (mousePosition.y < 30)
+            if (mousePosition.y < ChirperTopBound)
             {
-                mousePosition.y = 30;
+                mousePosition.y = ChirperTopBound;
             }
 
-            if (mousePosition.y > UiView.GetScreenResolution().y - 150)
+            if (mousePosition.y > UiView.GetScreenResolution().y - ChirperBottomBound)
             {
-                mousePosition.y = UiView.GetScreenResolution().y - 150;
+                mousePosition.y = UiView.GetScreenResolution().y - ChirperBottomBound;
             }
 
             return mousePosition;
