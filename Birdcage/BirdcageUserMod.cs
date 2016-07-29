@@ -1,8 +1,6 @@
 ﻿namespace SexyFishHorse.CitiesSkylines.Birdcage
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using ColossalFramework.Plugins;
     using ICities;
     using SexyFishHorse.CitiesSkylines.Infrastructure;
@@ -15,9 +13,9 @@
     {
         private readonly IConfigStore configStore;
 
-        private readonly ILogger logger;
+        private readonly FilterService filterService;
 
-        private readonly HashSet<IChirperMessage> messagesToRemove;
+        private readonly ILogger logger;
 
         private readonly PositionService positionService;
 
@@ -31,12 +29,10 @@
 
         private bool mouseDown;
 
-        private AudioClip notificationSound;
-
         public BirdcageUserMod()
         {
-            messagesToRemove = new HashSet<IChirperMessage>();
             configStore = new ConfigStore("Birdcage");
+            filterService = new FilterService();
             positionService = new PositionService();
 
             logger = LogManager.Instance.GetOrCreateLogger("Birdcage");
@@ -61,6 +57,8 @@
             }
         }
 
+        public AudioClip NotificationSound { get; set; }
+
         public override void OnCreated(IChirper c)
         {
             base.OnCreated(c);
@@ -69,7 +67,7 @@
             positionService.UiView = ChirpPanel.instance.component.GetUIView();
             positionService.DefaultPosition = chirper.builtinChirperPosition;
 
-            notificationSound = ChirpPanel.instance.m_NotificationSound;
+            NotificationSound = ChirpPanel.instance.m_NotificationSound;
 
             if (draggable)
             {
@@ -95,22 +93,9 @@
 
         public override void OnNewMessage(IChirperMessage message)
         {
-            if (!filterNonImportantMessages)
+            if (filterNonImportantMessages)
             {
-                return;
-            }
-
-            var citizenMessage = message as CitizenMessage;
-            if (citizenMessage == null)
-            {
-                return;
-            }
-
-            if (ShouldFilterMessage(citizenMessage))
-            {
-                ChirpPanel.instance.m_NotificationSound = null;
-
-                messagesToRemove.Add(message);
+                filterService.HandleNewMessage(message);
             }
         }
 
@@ -154,9 +139,9 @@
                     return;
                 }
 
-                if (messagesToRemove.Any())
+                if (filterNonImportantMessages)
                 {
-                    RemoveMessages();
+                    filterService.RemovePendingMessages(NotificationSound);
                 }
 
                 if (draggable)
@@ -213,19 +198,6 @@
             }
         }
 
-        private void RemoveMessages()
-        {
-            ChirpPanel.instance.Collapse();
-            foreach (var chirperMessage in messagesToRemove)
-            {
-                MessageManager.instance.DeleteMessage(chirperMessage);
-            }
-
-            ChirpPanel.instance.SynchronizeMessages();
-            ChirpPanel.instance.m_NotificationSound = notificationSound;
-            messagesToRemove.Clear();
-        }
-
         private bool IsMouseOnChirper()
         {
             var mouseGuiPos = positionService.GetMouseGuiPosition();
@@ -259,37 +231,6 @@
 
             chirper.SetBuiltinChirperAnchor(anchor);
             SaveChirperPosition(anchor);
-        }
-
-        private bool ShouldFilterMessage(CitizenMessage citizenMessage)
-        {
-            switch (citizenMessage.m_messageID)
-            {
-                case LocaleID.CHIRP_ABANDONED_BUILDINGS:
-                case LocaleID.CHIRP_COMMERCIAL_DEMAND:
-                case LocaleID.CHIRP_DEAD_PILING_UP:
-                case LocaleID.CHIRP_FIRE_HAZARD:
-                case LocaleID.CHIRP_HIGH_CRIME:
-                case LocaleID.CHIRP_INDUSTRIAL_DEMAND:
-                case LocaleID.CHIRP_LOW_HAPPINESS:
-                case LocaleID.CHIRP_LOW_HEALTH:
-                case LocaleID.CHIRP_NEED_MORE_PARKS:
-                case LocaleID.CHIRP_NEW_MAP_TILE:
-                case LocaleID.CHIRP_NOISEPOLLUTION:
-                case LocaleID.CHIRP_NO_ELECTRICITY:
-                case LocaleID.CHIRP_NO_HEALTHCARE:
-                case LocaleID.CHIRP_NO_PRISONS:
-                case LocaleID.CHIRP_NO_SCHOOLS:
-                case LocaleID.CHIRP_NO_WATER:
-                case LocaleID.CHIRP_POISONED:
-                case LocaleID.CHIRP_POLLUTION:
-                case LocaleID.CHIRP_RESIDENTIAL_DEMAND:
-                case LocaleID.CHIRP_SEWAGE:
-                case LocaleID.CHIRP_TRASH_PILING_UP:
-                    return false;
-                default:
-                    return true;
-            }
         }
 
         private void ToggleChirper(bool hideChirper)
