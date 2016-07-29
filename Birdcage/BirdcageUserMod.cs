@@ -34,6 +34,8 @@
 
         private bool controlDown;
 
+        private Vector2 defaultPosition;
+
         private bool draggable;
 
         private bool dragging;
@@ -45,8 +47,6 @@
         private AudioClip notificationSound;
 
         private UIView uiView;
-
-        private Vector2 defaultPosition;
 
         public BirdcageUserMod()
         {
@@ -163,14 +163,6 @@
             }
         }
 
-        private void ResetPosition()
-        {
-            chirper.builtinChirperPosition = defaultPosition;
-            chirper.SetBuiltinChirperAnchor(ChirperAnchor.TopCenter);
-
-            SaveChirperPosition(ChirperAnchor.TopCenter);
-        }
-
         public override void OnUpdate()
         {
             try
@@ -248,25 +240,26 @@
 
         private Vector2 EnsurePositionIsOnScreen(Vector2 mousePosition)
         {
-            if (mousePosition.x < 0)
+            if (mousePosition.x < 25)
             {
-                mousePosition.x = 0;
+                mousePosition.x = 25;
             }
 
-            if (mousePosition.x > uiView.GetScreenResolution().x)
+            if (mousePosition.x > uiView.GetScreenResolution().x - 40)
             {
-                mousePosition.x = uiView.GetScreenResolution().x;
+                mousePosition.x = uiView.GetScreenResolution().x - 40;
             }
 
-            if (mousePosition.y < 0)
+            if (mousePosition.y < 30)
             {
-                mousePosition.y = 0;
+                mousePosition.y = 30;
             }
 
-            if (mousePosition.y > uiView.GetScreenResolution().y)
+            if (mousePosition.y > uiView.GetScreenResolution().y - 150)
             {
-                mousePosition.y = uiView.GetScreenResolution().y;
+                mousePosition.y = uiView.GetScreenResolution().y - 150;
             }
+
             return mousePosition;
         }
 
@@ -285,6 +278,21 @@
 
             var mouseOnChirper = pointAndChirperMagnitude.magnitude < 35;
             return mouseOnChirper;
+        }
+
+        private void ResetPosition()
+        {
+            chirper.builtinChirperPosition = defaultPosition;
+            chirper.SetBuiltinChirperAnchor(ChirperAnchor.TopCenter);
+
+            SaveChirperPosition(ChirperAnchor.TopCenter);
+        }
+
+        private void SaveChirperPosition(ChirperAnchor anchor)
+        {
+            configStore.SaveSetting(SettingKeysChirperPositionX, (int)chirper.builtinChirperPosition.x);
+            configStore.SaveSetting(SettingKeysChirperPositionY, (int)chirper.builtinChirperPosition.y);
+            configStore.SaveSetting(SettingKeysChirperAnchor, (int)anchor);
         }
 
         private void SaveChirperPositionAndUpdateAnchor()
@@ -318,13 +326,6 @@
             chirper.SetBuiltinChirperAnchor(anchor);
 
             SaveChirperPosition(anchor);
-        }
-
-        private void SaveChirperPosition(ChirperAnchor anchor)
-        {
-            configStore.SaveSetting(SettingKeysChirperPositionX, (int)chirper.builtinChirperPosition.x);
-            configStore.SaveSetting(SettingKeysChirperPositionY, (int)chirper.builtinChirperPosition.y);
-            configStore.SaveSetting(SettingKeysChirperAnchor, (int)anchor);
         }
 
         private bool ShouldFilterMessage(CitizenMessage citizenMessage)
