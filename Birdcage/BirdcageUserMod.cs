@@ -150,16 +150,14 @@
                         dragging = false;
                         StopDragging();
                     }
-
-                    if (!dragging && inputService.PrimaryMouseButtonDownState && inputService.AnyControlDown)
+                    else if (!dragging && inputService.PrimaryMouseButtonDownState && inputService.AnyControlDown)
                     {
                         if (positionService.IsMouseOnChirper())
                         {
                             dragging = true;
                         }
                     }
-
-                    if (dragging)
+                    else if (dragging)
                     {
                         positionService.Dragging();
                     }
