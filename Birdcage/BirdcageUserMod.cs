@@ -3,24 +3,23 @@
     using System;
     using ColossalFramework.Plugins;
     using ICities;
+    using SexyFishHorse.CitiesSkylines.Birdcage.Options;
     using SexyFishHorse.CitiesSkylines.Infrastructure;
     using SexyFishHorse.CitiesSkylines.Infrastructure.Configuration;
-    using SexyFishHorse.CitiesSkylines.Infrastructure.UI;
     using SexyFishHorse.CitiesSkylines.Logger;
 
-    public class BirdcageUserMod : ChirperExtensionBase, IUserModWithOptionsPanel
+    public class BirdcageUserMod : IUserModWithOptionsPanel
     {
-        private const string SettingKeysHideChirper = "HideChirper";
-
-        private readonly IConfigStore configStore;
+        private readonly OptionsUiController optionsUiController;
 
         private readonly ILogger logger;
 
         public BirdcageUserMod()
         {
-            configStore = new ConfigStore("Birdcage");
+            optionsUiController = new OptionsUiController(new ConfigStore("Birdcage"));
 
             logger = LogManager.Instance.GetOrCreateLogger("Birdcage");
+            logger.Info("test");
         }
 
         public string Description
@@ -39,39 +38,13 @@
             }
         }
 
-        public override void OnCreated(IChirper c)
-        {
-            base.OnCreated(c);
-
-            var hideChirper = configStore.GetSetting<bool>(SettingKeysHideChirper);
-
-            ChirpPanel.instance.gameObject.SetActive(!hideChirper);
-        }
-
         public void OnSettingsUI(UIHelperBase uiHelper)
         {
+            uiHelper.AddButton("test", () => { logger.Info("click click"); });
+            logger.Info("on settings ui");
             try
             {
-                var helper = uiHelper.AsStronglyTyped();
-
-                helper.AddCheckBox("Hide chirper", configStore.GetSetting<bool>(SettingKeysHideChirper), ToggleChirper);
-            }
-            catch (Exception ex)
-            {
-                logger.LogException(ex, PluginManager.MessageType.Error);
-            }
-        }
-
-        private void ToggleChirper(bool hideChirper)
-        {
-            try
-            {
-                configStore.SaveSetting(SettingKeysHideChirper, hideChirper);
-
-                if (ChirpPanel.instance != null)
-                {
-                    ChirpPanel.instance.gameObject.SetActive(!hideChirper);
-                }
+                optionsUiController.ConfigureUi(uiHelper);
             }
             catch (Exception ex)
             {
