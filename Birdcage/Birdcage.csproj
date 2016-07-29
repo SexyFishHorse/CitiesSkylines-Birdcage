@@ -61,6 +61,7 @@
   <ItemGroup>
     <Compile Include="BirdcageUserMod.cs" />
     <Compile Include="FilterService.cs" />
+    <Compile Include="InputService.cs" />
     <Compile Include="PositionService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SettingKeys.cs" />

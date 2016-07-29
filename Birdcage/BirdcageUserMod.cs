@@ -17,11 +17,11 @@
 
         private readonly FilterService filterService;
 
+        private readonly InputService inputService;
+
         private readonly ILogger logger;
 
         private readonly PositionService positionService;
-
-        private bool controlDown;
 
         private bool draggable;
 
@@ -29,12 +29,11 @@
 
         private bool filterNonImportantMessages;
 
-        private bool mouseDown;
-
         public BirdcageUserMod()
         {
             configStore = new ConfigStore(ModName);
             filterService = new FilterService();
+            inputService = new InputService();
             positionService = new PositionService();
 
             logger = LogManager.Instance.GetOrCreateLogger(ModName);
@@ -143,34 +142,16 @@
 
                 if (draggable)
                 {
-                    if (Input.GetMouseButtonDown(0))
-                    {
-                        mouseDown = true;
-                    }
+                    inputService.SetPrimaryMouseButtonDownState();
+                    inputService.SetAnyControlDownState();
 
-                    if (Input.GetMouseButtonUp(0))
-                    {
-                        mouseDown = false;
-                    }
-
-                    if (dragging && mouseDown == false)
+                    if (dragging && !inputService.PrimaryMouseButtonDownState)
                     {
                         dragging = false;
                         StopDragging();
                     }
 
-                    if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl))
-                    {
-                        controlDown = true;
-                    }
-
-                    if ((Input.GetKeyUp(KeyCode.LeftControl) && !Input.GetKey(KeyCode.RightControl))
-                        || (Input.GetKeyUp(KeyCode.RightControl) && !Input.GetKey(KeyCode.LeftCommand)))
-                    {
-                        controlDown = false;
-                    }
-
-                    if (!dragging && mouseDown && controlDown)
+                    if (!dragging && inputService.PrimaryMouseButtonDownState && inputService.AnyControlDown)
                     {
                         if (positionService.IsMouseOnChirper())
                         {
