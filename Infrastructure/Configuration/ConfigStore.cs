@@ -91,7 +91,7 @@
 
         private void SaveConfigToFile(ModConfiguration modConfiguration)
         {
-            using (var fileStream = ConfigFileInfo.Open(FileMode.OpenOrCreate, FileAccess.Write))
+            using (var fileStream = ConfigFileInfo.Open(FileMode.Create, FileAccess.Write))
             {
                 serializer.Serialize(fileStream, modConfiguration);
             }
