@@ -13,18 +13,6 @@
 
     public class BirdcageUserMod : ChirperExtensionBase, IUserModWithOptionsPanel
     {
-        private const string SettingKeysChirperAnchor = "ChirperAnchor";
-
-        private const string SettingKeysChirperPositionX = "ChirperPositionX";
-
-        private const string SettingKeysChirperPositionY = "ChirperPositionY";
-
-        private const string SettingKeysDraggable = "Draggable";
-
-        private const string SettingKeysFilterMessages = "FilterMessages";
-
-        private const string SettingKeysHideChirper = "HideChirper";
-
         private readonly IConfigStore configStore;
 
         private readonly ILogger logger;
@@ -53,8 +41,8 @@
 
             logger = LogManager.Instance.GetOrCreateLogger("Birdcage");
 
-            filterNonImportantMessages = configStore.GetSetting<bool>(SettingKeysFilterMessages);
-            draggable = configStore.GetSetting<bool>(SettingKeysDraggable);
+            filterNonImportantMessages = configStore.GetSetting<bool>(SettingKeys.FilterMessages);
+            draggable = configStore.GetSetting<bool>(SettingKeys.Draggable);
         }
 
         public string Description
@@ -87,21 +75,21 @@
             {
                 c.SetBuiltinChirperFree(true);
 
-                if (configStore.HasSetting(SettingKeysChirperPositionX))
+                if (configStore.HasSetting(SettingKeys.ChirperPositionX))
                 {
-                    var chirperX = configStore.GetSetting<int>(SettingKeysChirperPositionX);
-                    var chirperY = configStore.GetSetting<int>(SettingKeysChirperPositionY);
+                    var chirperX = configStore.GetSetting<int>(SettingKeys.ChirperPositionX);
+                    var chirperY = configStore.GetSetting<int>(SettingKeys.ChirperPositionY);
                     var chirperPosition = new Vector2(chirperX, chirperY);
                     chirperPosition = positionService.EnsurePositionIsOnScreen(chirperPosition);
 
-                    var chirperAnchor = (ChirperAnchor)configStore.GetSetting<int>(SettingKeysChirperAnchor);
+                    var chirperAnchor = (ChirperAnchor)configStore.GetSetting<int>(SettingKeys.ChirperAnchor);
 
                     chirper.builtinChirperPosition = chirperPosition;
                     chirper.SetBuiltinChirperAnchor(chirperAnchor);
                 }
             }
 
-            var hideChirper = configStore.GetSetting<bool>(SettingKeysHideChirper);
+            var hideChirper = configStore.GetSetting<bool>(SettingKeys.HideChirper);
             chirper.ShowBuiltinChirper(!hideChirper);
         }
 
@@ -135,20 +123,20 @@
                 var appearanceGroup = helper.AddGroup("Appearance");
 
                 appearanceGroup.AddCheckBox(
-                    "Hide chirper", 
-                    configStore.GetSetting<bool>(SettingKeysHideChirper), 
+                    "Hide chirper",
+                    configStore.GetSetting<bool>(SettingKeys.HideChirper),
                     ToggleChirper);
                 appearanceGroup.AddCheckBox(
-                    "Make Chirper draggable (hold ctrl + left mouse button)", 
-                    configStore.GetSetting<bool>(SettingKeysDraggable), 
+                    "Make Chirper draggable (hold ctrl + left mouse button)",
+                    configStore.GetSetting<bool>(SettingKeys.Draggable),
                     ToggleDraggable);
                 appearanceGroup.AddButton("Reset Chirper position", ResetPosition);
 
                 var behaviourGroup = helper.AddGroup("Behaviour");
 
                 behaviourGroup.AddCheckBox(
-                    "Filter non-important messages", 
-                    configStore.GetSetting<bool>(SettingKeysFilterMessages), 
+                    "Filter non-important messages",
+                    configStore.GetSetting<bool>(SettingKeys.FilterMessages),
                     ToggleFilter);
             }
             catch (Exception ex)
@@ -260,9 +248,9 @@
 
         private void SaveChirperPosition(ChirperAnchor anchor)
         {
-            configStore.SaveSetting(SettingKeysChirperPositionX, (int)chirper.builtinChirperPosition.x);
-            configStore.SaveSetting(SettingKeysChirperPositionY, (int)chirper.builtinChirperPosition.y);
-            configStore.SaveSetting(SettingKeysChirperAnchor, (int)anchor);
+            configStore.SaveSetting(SettingKeys.ChirperPositionX, (int)chirper.builtinChirperPosition.x);
+            configStore.SaveSetting(SettingKeys.ChirperPositionY, (int)chirper.builtinChirperPosition.y);
+            configStore.SaveSetting(SettingKeys.ChirperAnchor, (int)anchor);
         }
 
         private void SaveChirperPositionAndUpdateAnchor()
@@ -308,7 +296,7 @@
         {
             try
             {
-                configStore.SaveSetting(SettingKeysHideChirper, hideChirper);
+                configStore.SaveSetting(SettingKeys.HideChirper, hideChirper);
 
                 if (ChirpPanel.instance != null)
                 {
@@ -336,7 +324,7 @@
             {
                 filterNonImportantMessages = shouldFilter;
 
-                configStore.SaveSetting(SettingKeysFilterMessages, shouldFilter);
+                configStore.SaveSetting(SettingKeys.FilterMessages, shouldFilter);
             }
             catch (Exception ex)
             {
