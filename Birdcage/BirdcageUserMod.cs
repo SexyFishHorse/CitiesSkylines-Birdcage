@@ -79,36 +79,30 @@
         {
             base.OnCreated(c);
 
-            defaultPosition = c.builtinChirperPosition;
-
-            if (configStore.HasSetting(SettingKeysChirperPositionX))
-            {
-                var chirperX = configStore.GetSetting<int>(SettingKeysChirperPositionX);
-                var chirperY = configStore.GetSetting<int>(SettingKeysChirperPositionY);
-                var chirperPosition = new Vector2(chirperX, chirperY);
-                chirperPosition = EnsurePositionIsOnScreen(chirperPosition);
-
-                var chirperAnchor = (ChirperAnchor)configStore.GetSetting<int>(SettingKeysChirperAnchor);
-
-                chirper.builtinChirperPosition = chirperPosition;
-                chirper.SetBuiltinChirperAnchor(chirperAnchor);
-            }
-            else
-            {
-                chirper.builtinChirperPosition = new Vector2(100, 100);
-                chirper.SetBuiltinChirperAnchor(ChirperAnchor.TopLeft);
-            }
+            defaultPosition = chirper.builtinChirperPosition;
+            notificationSound = ChirpPanel.instance.m_NotificationSound;
+            uiView = ChirpPanel.instance.component.GetUIView();
 
             if (draggable)
             {
                 c.SetBuiltinChirperFree(true);
+
+                if (configStore.HasSetting(SettingKeysChirperPositionX))
+                {
+                    var chirperX = configStore.GetSetting<int>(SettingKeysChirperPositionX);
+                    var chirperY = configStore.GetSetting<int>(SettingKeysChirperPositionY);
+                    var chirperPosition = new Vector2(chirperX, chirperY);
+                    chirperPosition = EnsurePositionIsOnScreen(chirperPosition);
+
+                    var chirperAnchor = (ChirperAnchor)configStore.GetSetting<int>(SettingKeysChirperAnchor);
+
+                    chirper.builtinChirperPosition = chirperPosition;
+                    chirper.SetBuiltinChirperAnchor(chirperAnchor);
+                }
             }
 
             var hideChirper = configStore.GetSetting<bool>(SettingKeysHideChirper);
-
-            notificationSound = ChirpPanel.instance.m_NotificationSound;
-            ChirpPanel.instance.gameObject.SetActive(!hideChirper);
-            uiView = ChirpPanel.instance.component.GetUIView();
+            chirper.ShowBuiltinChirper(!hideChirper);
         }
 
         public override void OnNewMessage(IChirperMessage message)
