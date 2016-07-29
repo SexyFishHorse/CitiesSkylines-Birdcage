@@ -224,6 +224,7 @@
 
                     if (dragging)
                     {
+                        ChirpPanel.instance.Collapse();
                         var mousePosition = GetMouseGuiPosition();
 
                         mousePosition = EnsurePositionIsOnScreen(mousePosition);
