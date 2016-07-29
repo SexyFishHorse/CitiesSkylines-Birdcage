@@ -145,7 +145,7 @@
                     configStore.GetSetting<bool>(SettingKeysHideChirper),
                     ToggleChirper);
                 appearanceGroup.AddCheckBox(
-                    "Make Chirper draggable",
+                    "Make Chirper draggable (hold ctrl + left mouse button)",
                     configStore.GetSetting<bool>(SettingKeysDraggable),
                     ToggleDraggable);
                 appearanceGroup.AddButton("Reset Chirper position", ResetPosition);
