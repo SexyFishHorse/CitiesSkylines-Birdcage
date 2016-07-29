@@ -1,19 +1,25 @@
 ﻿namespace SexyFishHorse.CitiesSkylines.Birdcage
 {
-    using ColossalFramework.UI;
+    using System;
+    using ColossalFramework.Plugins;
     using ICities;
+    using SexyFishHorse.CitiesSkylines.Birdcage.Options;
     using SexyFishHorse.CitiesSkylines.Infrastructure;
     using SexyFishHorse.CitiesSkylines.Infrastructure.Configuration;
+    using SexyFishHorse.CitiesSkylines.Logger;
 
     public class BirdcageUserMod : IUserModWithOptionsPanel
     {
-        private readonly IOptionsController optionsController;
+        private readonly OptionsUiController optionsUiController;
 
-        private readonly ConfigStore configStore;
+        private readonly ILogger logger;
 
         public BirdcageUserMod()
         {
-            optionsController = new OptionsController();
+            optionsUiController = new OptionsUiController(new ConfigStore("Birdcage"));
+
+            logger = LogManager.Instance.GetOrCreateLogger("Birdcage");
+            logger.Info("test");
         }
 
         public string Description
@@ -34,12 +40,16 @@
 
         public void OnSettingsUI(UIHelperBase uiHelper)
         {
-            var hideChirperButton =
-                (UIButton)
-                uiHelper.AddCheckbox(
-                    "Hide chirper", 
-                    configStore.GetSetting<bool>("HideChirper"), 
-                    optionsController.HideChirper());
+            uiHelper.AddButton("test", () => { logger.Info("click click"); });
+            logger.Info("on settings ui");
+            try
+            {
+                optionsUiController.ConfigureUi(uiHelper);
+            }
+            catch (Exception ex)
+            {
+                logger.LogException(ex, PluginManager.MessageType.Error);
+            }
         }
     }
 }

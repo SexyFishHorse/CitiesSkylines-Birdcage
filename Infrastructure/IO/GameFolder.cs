@@ -1,5 +1,8 @@
 ﻿namespace SexyFishHorse.CitiesSkylines.Infrastructure.IO
 {
+    using JetBrains.Annotations;
+
+    [UsedImplicitly(ImplicitUseTargetFlags.Members)]
     public enum GameFolder
     {
         [FolderPath("")]
@@ -39,6 +42,6 @@
         Snapshots = 4,
 
         [FolderPath("WorkshopStagingArea")]
-        WorkshopStagingArea = 5,
+        WorkshopStagingArea = 5
     }
 }
