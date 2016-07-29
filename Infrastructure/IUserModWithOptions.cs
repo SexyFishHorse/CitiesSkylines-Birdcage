@@ -7,6 +7,6 @@
     public interface IUserModWithOptionsPanel : IUserMod
     {
         // ReSharper disable once InconsistentNaming
-        void OnSettingsUI(UIHelperBase uiHelper);
+        void OnSettingsUI(UIHelperBase uiHelperBase);
     }
 }

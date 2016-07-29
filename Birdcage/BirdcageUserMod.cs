@@ -1,8 +1,6 @@
 ﻿namespace SexyFishHorse.CitiesSkylines.Birdcage
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using ColossalFramework.Plugins;
     using ICities;
     using SexyFishHorse.CitiesSkylines.Infrastructure;
@@ -13,28 +11,35 @@
 
     public class BirdcageUserMod : ChirperExtensionBase, IUserModWithOptionsPanel
     {
-        private const string SettingKeysFilterMessages = "FilterMessages";
-
-        private const string SettingKeysHideChirper = "HideChirper";
+        private const string ModName = "Birdcage";
 
         private readonly IConfigStore configStore;
 
+        private readonly FilterService filterService;
+
+        private readonly InputService inputService;
+
         private readonly ILogger logger;
 
-        private readonly HashSet<IChirperMessage> messagesToRemove;
+        private readonly PositionService positionService;
+
+        private bool draggable;
+
+        private bool dragging;
 
         private bool filterNonImportantMessages;
 
-        private AudioClip notificationSound;
-
         public BirdcageUserMod()
         {
-            messagesToRemove = new HashSet<IChirperMessage>();
-            configStore = new ConfigStore("Birdcage");
+            configStore = new ConfigStore(ModName);
+            filterService = new FilterService();
+            inputService = new InputService();
+            positionService = new PositionService();
 
-            logger = LogManager.Instance.GetOrCreateLogger("Birdcage");
+            logger = LogManager.Instance.GetOrCreateLogger(ModName);
 
-            filterNonImportantMessages = configStore.GetSetting<bool>(SettingKeysFilterMessages);
+            filterNonImportantMessages = configStore.GetSetting<bool>(SettingKeys.FilterMessages);
+            draggable = configStore.GetSetting<bool>(SettingKeys.Draggable);
         }
 
         public string Description
@@ -49,51 +54,70 @@
         {
             get
             {
-                return "Birdcage";
+                return ModName;
             }
         }
+
+        public AudioClip NotificationSound { get; set; }
 
         public override void OnCreated(IChirper c)
         {
             base.OnCreated(c);
 
-            var hideChirper = configStore.GetSetting<bool>(SettingKeysHideChirper);
+            positionService.Chirper = c;
+            positionService.DefaultPosition = chirper.builtinChirperPosition;
+            positionService.UiView = ChirpPanel.instance.component.GetUIView();
 
-            notificationSound = ChirpPanel.instance.m_NotificationSound;
-            ChirpPanel.instance.gameObject.SetActive(!hideChirper);
+            NotificationSound = ChirpPanel.instance.m_NotificationSound;
+
+            if (draggable)
+            {
+                c.SetBuiltinChirperFree(true);
+
+                if (configStore.HasSetting(SettingKeys.ChirperPositionX))
+                {
+                    var chirperX = configStore.GetSetting<int>(SettingKeys.ChirperPositionX);
+                    var chirperY = configStore.GetSetting<int>(SettingKeys.ChirperPositionY);
+                    var chirperPosition = new Vector2(chirperX, chirperY);
+
+                    positionService.UpdateChirperPosition(chirperPosition);
+                }
+            }
+
+            var hideChirper = configStore.GetSetting<bool>(SettingKeys.HideChirper);
+            chirper.ShowBuiltinChirper(!hideChirper);
         }
 
         public override void OnNewMessage(IChirperMessage message)
         {
-            if (!filterNonImportantMessages)
+            if (filterNonImportantMessages)
             {
-                return;
-            }
-
-            var citizenMessage = message as CitizenMessage;
-            if (citizenMessage == null)
-            {
-                return;
-            }
-
-            if (ShouldFilterMessage(citizenMessage))
-            {
-                ChirpPanel.instance.m_NotificationSound = null;
-
-                messagesToRemove.Add(message);
+                filterService.HandleNewMessage(message);
             }
         }
 
-        public void OnSettingsUI(UIHelperBase uiHelper)
+        public void OnSettingsUI(UIHelperBase uiHelperBase)
         {
             try
             {
-                var helper = uiHelper.AsStronglyTyped();
+                var uiHelper = uiHelperBase.AsStronglyTyped();
 
-                helper.AddCheckBox("Hide chirper", configStore.GetSetting<bool>(SettingKeysHideChirper), ToggleChirper);
-                helper.AddCheckBox(
-                    "Filter non-important messages", 
-                    configStore.GetSetting<bool>(SettingKeysFilterMessages), 
+                var appearanceGroup = uiHelper.AddGroup("Appearance");
+                var behaviourGroup = uiHelper.AddGroup("Behaviour");
+
+                appearanceGroup.AddCheckBox(
+                    "Hide chirper",
+                    configStore.GetSetting<bool>(SettingKeys.HideChirper),
+                    ToggleChirper);
+                appearanceGroup.AddCheckBox(
+                    "Make Chirper draggable (hold ctrl + left mouse button)",
+                    configStore.GetSetting<bool>(SettingKeys.Draggable),
+                    ToggleDraggable);
+                appearanceGroup.AddButton("Reset Chirper position", ResetPosition);
+
+                behaviourGroup.AddCheckBox(
+                    "Filter non-important messages",
+                    configStore.GetSetting<bool>(SettingKeys.FilterMessages),
                     ToggleFilter);
             }
             catch (Exception ex)
@@ -106,17 +130,37 @@
         {
             try
             {
-                if (messagesToRemove.Any())
+                if (ChirpPanel.instance == null)
                 {
-                    ChirpPanel.instance.Collapse();
-                    foreach (var chirperMessage in messagesToRemove)
-                    {
-                        MessageManager.instance.DeleteMessage(chirperMessage);
-                    }
+                    return;
+                }
 
-                    ChirpPanel.instance.SynchronizeMessages();
-                    ChirpPanel.instance.m_NotificationSound = notificationSound;
-                    messagesToRemove.Clear();
+                if (filterNonImportantMessages)
+                {
+                    filterService.RemovePendingMessages(NotificationSound);
+                }
+
+                if (draggable)
+                {
+                    inputService.SetPrimaryMouseButtonDownState();
+                    inputService.SetAnyControlDownState();
+
+                    if (dragging && !inputService.PrimaryMouseButtonDownState)
+                    {
+                        dragging = false;
+                        StopDragging();
+                    }
+                    else if (!dragging && inputService.PrimaryMouseButtonDownState && inputService.AnyControlDown)
+                    {
+                        if (positionService.IsMouseOnChirper())
+                        {
+                            dragging = true;
+                        }
+                    }
+                    else if (dragging)
+                    {
+                        positionService.Dragging();
+                    }
                 }
             }
             catch (Exception ex)
@@ -125,42 +169,30 @@
             }
         }
 
-        private bool ShouldFilterMessage(CitizenMessage citizenMessage)
+        private void ResetPosition()
         {
-            switch (citizenMessage.m_messageID)
-            {
-                case LocaleID.CHIRP_ABANDONED_BUILDINGS:
-                case LocaleID.CHIRP_COMMERCIAL_DEMAND:
-                case LocaleID.CHIRP_DEAD_PILING_UP:
-                case LocaleID.CHIRP_FIRE_HAZARD:
-                case LocaleID.CHIRP_HIGH_CRIME:
-                case LocaleID.CHIRP_INDUSTRIAL_DEMAND:
-                case LocaleID.CHIRP_LOW_HAPPINESS:
-                case LocaleID.CHIRP_LOW_HEALTH:
-                case LocaleID.CHIRP_NEED_MORE_PARKS:
-                case LocaleID.CHIRP_NEW_MAP_TILE:
-                case LocaleID.CHIRP_NOISEPOLLUTION:
-                case LocaleID.CHIRP_NO_ELECTRICITY:
-                case LocaleID.CHIRP_NO_HEALTHCARE:
-                case LocaleID.CHIRP_NO_PRISONS:
-                case LocaleID.CHIRP_NO_SCHOOLS:
-                case LocaleID.CHIRP_NO_WATER:
-                case LocaleID.CHIRP_POISONED:
-                case LocaleID.CHIRP_POLLUTION:
-                case LocaleID.CHIRP_RESIDENTIAL_DEMAND:
-                case LocaleID.CHIRP_SEWAGE:
-                case LocaleID.CHIRP_TRASH_PILING_UP:
-                    return false;
-                default:
-                    return true;
-            }
+            positionService.ResetPosition();
+
+            SaveChirperPosition();
+        }
+
+        private void SaveChirperPosition()
+        {
+            configStore.SaveSetting(SettingKeys.ChirperPositionX, (int)chirper.builtinChirperPosition.x);
+            configStore.SaveSetting(SettingKeys.ChirperPositionY, (int)chirper.builtinChirperPosition.y);
+        }
+
+        private void StopDragging()
+        {
+            positionService.UpdateChirperAnchor();
+            SaveChirperPosition();
         }
 
         private void ToggleChirper(bool hideChirper)
         {
             try
             {
-                configStore.SaveSetting(SettingKeysHideChirper, hideChirper);
+                configStore.SaveSetting(SettingKeys.HideChirper, hideChirper);
 
                 if (ChirpPanel.instance != null)
                 {
@@ -173,13 +205,22 @@
             }
         }
 
+        private void ToggleDraggable(bool isDraggable)
+        {
+            draggable = isDraggable;
+            if (chirper != null)
+            {
+                chirper.SetBuiltinChirperFree(true);
+            }
+        }
+
         private void ToggleFilter(bool shouldFilter)
         {
             try
             {
                 filterNonImportantMessages = shouldFilter;
 
-                configStore.SaveSetting(SettingKeysFilterMessages, shouldFilter);
+                configStore.SaveSetting(SettingKeys.FilterMessages, shouldFilter);
             }
             catch (Exception ex)
             {

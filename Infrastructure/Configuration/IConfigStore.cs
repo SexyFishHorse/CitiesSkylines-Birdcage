@@ -15,5 +15,7 @@
         void RemoveSetting(string key);
 
         void SaveSetting<T>(string key, T value);
+
+        bool HasSetting(string key);
     }
 }
