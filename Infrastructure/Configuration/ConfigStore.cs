@@ -70,7 +70,7 @@
             {
                 var message =
                     string.Format(
-                        "The configuration value for the key {0} is null. Use RemoveSetting to remove a value", 
+                        "The configuration value for the key {0} is null. Use RemoveSetting to remove a value",
                         key);
 
                 throw new ArgumentNullException("value", message);
@@ -103,11 +103,18 @@
                 return new ModConfiguration();
             }
 
-            using (var fileStream = ConfigFileInfo.OpenRead())
+            try
             {
-                var config = serializer.Deserialize(fileStream) as ModConfiguration;
+                using (var fileStream = ConfigFileInfo.OpenRead())
+                {
+                    var config = serializer.Deserialize(fileStream) as ModConfiguration;
 
-                return config ?? new ModConfiguration();
+                    return config ?? new ModConfiguration();
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                return new ModConfiguration();
             }
         }
 
