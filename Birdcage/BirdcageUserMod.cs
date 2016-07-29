@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using ColossalFramework.Plugins;
-    using ColossalFramework.UI;
     using ICities;
     using SexyFishHorse.CitiesSkylines.Infrastructure;
     using SexyFishHorse.CitiesSkylines.Infrastructure.Configuration;
@@ -32,9 +31,9 @@
 
         private readonly HashSet<IChirperMessage> messagesToRemove;
 
-        private bool controlDown;
+        private readonly PositionService positionService;
 
-        private Vector2 defaultPosition;
+        private bool controlDown;
 
         private bool draggable;
 
@@ -46,12 +45,11 @@
 
         private AudioClip notificationSound;
 
-        private UIView uiView;
-
         public BirdcageUserMod()
         {
             messagesToRemove = new HashSet<IChirperMessage>();
             configStore = new ConfigStore("Birdcage");
+            positionService = new PositionService();
 
             logger = LogManager.Instance.GetOrCreateLogger("Birdcage");
 
@@ -79,9 +77,11 @@
         {
             base.OnCreated(c);
 
-            defaultPosition = chirper.builtinChirperPosition;
+            positionService.Chirper = c;
+            positionService.UiView = ChirpPanel.instance.component.GetUIView();
+            positionService.DefaultPosition = chirper.builtinChirperPosition;
+
             notificationSound = ChirpPanel.instance.m_NotificationSound;
-            uiView = ChirpPanel.instance.component.GetUIView();
 
             if (draggable)
             {
@@ -92,7 +92,7 @@
                     var chirperX = configStore.GetSetting<int>(SettingKeysChirperPositionX);
                     var chirperY = configStore.GetSetting<int>(SettingKeysChirperPositionY);
                     var chirperPosition = new Vector2(chirperX, chirperY);
-                    chirperPosition = EnsurePositionIsOnScreen(chirperPosition);
+                    chirperPosition = positionService.EnsurePositionIsOnScreen(chirperPosition);
 
                     var chirperAnchor = (ChirperAnchor)configStore.GetSetting<int>(SettingKeysChirperAnchor);
 
@@ -135,20 +135,20 @@
                 var appearanceGroup = helper.AddGroup("Appearance");
 
                 appearanceGroup.AddCheckBox(
-                    "Hide chirper",
-                    configStore.GetSetting<bool>(SettingKeysHideChirper),
+                    "Hide chirper", 
+                    configStore.GetSetting<bool>(SettingKeysHideChirper), 
                     ToggleChirper);
                 appearanceGroup.AddCheckBox(
-                    "Make Chirper draggable (hold ctrl + left mouse button)",
-                    configStore.GetSetting<bool>(SettingKeysDraggable),
+                    "Make Chirper draggable (hold ctrl + left mouse button)", 
+                    configStore.GetSetting<bool>(SettingKeysDraggable), 
                     ToggleDraggable);
                 appearanceGroup.AddButton("Reset Chirper position", ResetPosition);
 
                 var behaviourGroup = helper.AddGroup("Behaviour");
 
                 behaviourGroup.AddCheckBox(
-                    "Filter non-important messages",
-                    configStore.GetSetting<bool>(SettingKeysFilterMessages),
+                    "Filter non-important messages", 
+                    configStore.GetSetting<bool>(SettingKeysFilterMessages), 
                     ToggleFilter);
             }
             catch (Exception ex)
@@ -168,15 +168,7 @@
 
                 if (messagesToRemove.Any())
                 {
-                    ChirpPanel.instance.Collapse();
-                    foreach (var chirperMessage in messagesToRemove)
-                    {
-                        MessageManager.instance.DeleteMessage(chirperMessage);
-                    }
-
-                    ChirpPanel.instance.SynchronizeMessages();
-                    ChirpPanel.instance.m_NotificationSound = notificationSound;
-                    messagesToRemove.Clear();
+                    RemoveMessages();
                 }
 
                 if (draggable)
@@ -219,9 +211,9 @@
                     if (dragging)
                     {
                         ChirpPanel.instance.Collapse();
-                        var mousePosition = GetMouseGuiPosition();
+                        var mousePosition = positionService.GetMouseGuiPosition();
 
-                        mousePosition = EnsurePositionIsOnScreen(mousePosition);
+                        mousePosition = positionService.EnsurePositionIsOnScreen(mousePosition);
 
                         chirper.builtinChirperPosition = mousePosition;
                     }
@@ -233,41 +225,22 @@
             }
         }
 
-        private Vector2 EnsurePositionIsOnScreen(Vector2 mousePosition)
+        private void RemoveMessages()
         {
-            if (mousePosition.x < 25)
+            ChirpPanel.instance.Collapse();
+            foreach (var chirperMessage in messagesToRemove)
             {
-                mousePosition.x = 25;
+                MessageManager.instance.DeleteMessage(chirperMessage);
             }
 
-            if (mousePosition.x > uiView.GetScreenResolution().x - 40)
-            {
-                mousePosition.x = uiView.GetScreenResolution().x - 40;
-            }
-
-            if (mousePosition.y < 30)
-            {
-                mousePosition.y = 30;
-            }
-
-            if (mousePosition.y > uiView.GetScreenResolution().y - 150)
-            {
-                mousePosition.y = uiView.GetScreenResolution().y - 150;
-            }
-
-            return mousePosition;
-        }
-
-        private Vector2 GetMouseGuiPosition()
-        {
-            var mouseWorldPos = Camera.current.ScreenToWorldPoint(Input.mousePosition);
-            var mouseGuiPos = uiView.WorldPointToGUI(uiView.uiCamera, mouseWorldPos);
-            return mouseGuiPos;
+            ChirpPanel.instance.SynchronizeMessages();
+            ChirpPanel.instance.m_NotificationSound = notificationSound;
+            messagesToRemove.Clear();
         }
 
         private bool IsMouseOnChirper()
         {
-            var mouseGuiPos = GetMouseGuiPosition();
+            var mouseGuiPos = positionService.GetMouseGuiPosition();
 
             var pointAndChirperMagnitude = mouseGuiPos - chirper.builtinChirperPosition;
 
@@ -277,10 +250,12 @@
 
         private void ResetPosition()
         {
-            chirper.builtinChirperPosition = defaultPosition;
-            chirper.SetBuiltinChirperAnchor(ChirperAnchor.TopCenter);
+            const ChirperAnchor Anchor = ChirperAnchor.TopCenter;
 
-            SaveChirperPosition(ChirperAnchor.TopCenter);
+            chirper.builtinChirperPosition = positionService.DefaultPosition;
+            chirper.SetBuiltinChirperAnchor(Anchor);
+
+            SaveChirperPosition(Anchor);
         }
 
         private void SaveChirperPosition(ChirperAnchor anchor)
@@ -292,34 +267,9 @@
 
         private void SaveChirperPositionAndUpdateAnchor()
         {
-            var thirdOfUiWidth = uiView.GetScreenResolution().x / 3;
-            var halfUiHeight = uiView.GetScreenResolution().y / 2;
-
-            ChirperAnchor anchor;
-
-            if (chirper.builtinChirperPosition.x < thirdOfUiWidth)
-            {
-                anchor = chirper.builtinChirperPosition.y < halfUiHeight
-                             ? ChirperAnchor.TopLeft
-                             : ChirperAnchor.BottomLeft;
-            }
-            else if (chirper.builtinChirperPosition.x > thirdOfUiWidth * 2)
-            {
-                anchor = chirper.builtinChirperPosition.y < halfUiHeight
-                             ? ChirperAnchor.TopRight
-                             : ChirperAnchor.BottomRight;
-            }
-            else if (chirper.builtinChirperPosition.y < halfUiHeight)
-            {
-                anchor = ChirperAnchor.TopCenter;
-            }
-            else
-            {
-                anchor = ChirperAnchor.BottomCenter;
-            }
+            var anchor = positionService.CalculateChirperAnchor();
 
             chirper.SetBuiltinChirperAnchor(anchor);
-
             SaveChirperPosition(anchor);
         }
 
