@@ -46,6 +46,8 @@
 
         private UIView uiView;
 
+        private Vector2 defaultPosition;
+
         public BirdcageUserMod()
         {
             messagesToRemove = new HashSet<IChirperMessage>();
@@ -76,6 +78,8 @@
         public override void OnCreated(IChirper c)
         {
             base.OnCreated(c);
+
+            defaultPosition = c.builtinChirperPosition;
 
             if (configStore.HasSetting(SettingKeysChirperPositionX))
             {
@@ -144,6 +148,7 @@
                     "Make Chirper draggable",
                     configStore.GetSetting<bool>(SettingKeysDraggable),
                     ToggleDraggable);
+                appearanceGroup.AddButton("Reset Chirper position", ResetPosition);
 
                 var behaviourGroup = helper.AddGroup("Behaviour");
 
@@ -156,6 +161,14 @@
             {
                 logger.LogException(ex, PluginManager.MessageType.Error);
             }
+        }
+
+        private void ResetPosition()
+        {
+            chirper.builtinChirperPosition = defaultPosition;
+            chirper.SetBuiltinChirperAnchor(ChirperAnchor.TopCenter);
+
+            SaveChirperPosition(ChirperAnchor.TopCenter);
         }
 
         public override void OnUpdate()
@@ -304,6 +317,11 @@
 
             chirper.SetBuiltinChirperAnchor(anchor);
 
+            SaveChirperPosition(anchor);
+        }
+
+        private void SaveChirperPosition(ChirperAnchor anchor)
+        {
             configStore.SaveSetting(SettingKeysChirperPositionX, (int)chirper.builtinChirperPosition.x);
             configStore.SaveSetting(SettingKeysChirperPositionY, (int)chirper.builtinChirperPosition.y);
             configStore.SaveSetting(SettingKeysChirperAnchor, (int)anchor);
