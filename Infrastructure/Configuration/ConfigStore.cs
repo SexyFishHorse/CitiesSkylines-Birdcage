@@ -69,6 +69,11 @@
 
             var modConfiguration = LoadConfigFromFile();
 
+            if (modConfiguration.Settings.Any(x => x.Key == key))
+            {
+                modConfiguration.Settings.Remove(modConfiguration.Settings.Single(x => x.Key == key));
+            }
+
             modConfiguration.Settings.Add(new KeyValuePair<string, object>(key, value));
 
             SaveConfigToFile(modConfiguration);
