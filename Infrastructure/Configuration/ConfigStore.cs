@@ -42,6 +42,13 @@
             return default(T);
         }
 
+        public bool HasSetting(string key)
+        {
+            var config = LoadConfigFromFile();
+
+            return config.Settings.Any(x => x.Key == key);
+        }
+
         public void RemoveSetting(string key)
         {
             key.ShouldNotBeNull("key");
@@ -61,7 +68,7 @@
             {
                 var message =
                     string.Format(
-                        "The configuration value for the key {0} is null. Use RemoveSetting to remove a value",
+                        "The configuration value for the key {0} is null. Use RemoveSetting to remove a value", 
                         key);
 
                 throw new ArgumentNullException("value", message);
