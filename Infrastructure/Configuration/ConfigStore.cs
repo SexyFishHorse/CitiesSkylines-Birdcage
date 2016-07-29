@@ -24,6 +24,8 @@
             ConfigFileInfo = new FileInfo(Path.Combine(modFolderPath, ConfigFileName));
 
             serializer = new XmlSerializer(typeof(ModConfiguration));
+
+            EnsureFileExists();
         }
 
         public FileInfo ConfigFileInfo { get; private set; }
@@ -68,7 +70,7 @@
             {
                 var message =
                     string.Format(
-                        "The configuration value for the key {0} is null. Use RemoveSetting to remove a value", 
+                        "The configuration value for the key {0} is null. Use RemoveSetting to remove a value",
                         key);
 
                 throw new ArgumentNullException("value", message);
@@ -86,6 +88,14 @@
             SaveConfigToFile(modConfiguration);
         }
 
+        private void EnsureFileExists()
+        {
+            if (!ConfigFileInfo.Exists)
+            {
+                SaveConfigToFile(new ModConfiguration());
+            }
+        }
+
         private ModConfiguration LoadConfigFromFile()
         {
             if (!ConfigFileInfo.Exists)
@@ -93,11 +103,18 @@
                 return new ModConfiguration();
             }
 
-            using (var fileStream = ConfigFileInfo.OpenRead())
+            try
             {
-                var config = serializer.Deserialize(fileStream) as ModConfiguration;
+                using (var fileStream = ConfigFileInfo.OpenRead())
+                {
+                    var config = serializer.Deserialize(fileStream) as ModConfiguration;
 
-                return config ?? new ModConfiguration();
+                    return config ?? new ModConfiguration();
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                return new ModConfiguration();
             }
         }
 
