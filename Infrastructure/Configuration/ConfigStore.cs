@@ -24,6 +24,8 @@
             ConfigFileInfo = new FileInfo(Path.Combine(modFolderPath, ConfigFileName));
 
             serializer = new XmlSerializer(typeof(ModConfiguration));
+
+            EnsureFileExists();
         }
 
         public FileInfo ConfigFileInfo { get; private set; }
@@ -84,6 +86,14 @@
             modConfiguration.Settings.Add(new KeyValuePair<string, object>(key, value));
 
             SaveConfigToFile(modConfiguration);
+        }
+
+        private void EnsureFileExists()
+        {
+            if (!ConfigFileInfo.Exists)
+            {
+                SaveConfigToFile(new ModConfiguration());
+            }
         }
 
         private ModConfiguration LoadConfigFromFile()
