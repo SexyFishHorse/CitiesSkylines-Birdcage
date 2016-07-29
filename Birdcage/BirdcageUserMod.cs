@@ -11,6 +11,8 @@
 
     public class BirdcageUserMod : ChirperExtensionBase, IUserModWithOptionsPanel
     {
+        private const string ModName = "Birdcage";
+
         private readonly IConfigStore configStore;
 
         private readonly FilterService filterService;
@@ -31,11 +33,11 @@
 
         public BirdcageUserMod()
         {
-            configStore = new ConfigStore("Birdcage");
+            configStore = new ConfigStore(ModName);
             filterService = new FilterService();
             positionService = new PositionService();
 
-            logger = LogManager.Instance.GetOrCreateLogger("Birdcage");
+            logger = LogManager.Instance.GetOrCreateLogger(ModName);
 
             filterNonImportantMessages = configStore.GetSetting<bool>(SettingKeys.FilterMessages);
             draggable = configStore.GetSetting<bool>(SettingKeys.Draggable);
@@ -53,7 +55,7 @@
         {
             get
             {
-                return "Birdcage";
+                return ModName;
             }
         }
 
