@@ -99,7 +99,7 @@
             }
         }
 
-        public void OnSettingsUI(UIHelperBase uiHelper)
+        public void OnSettingsUI(UIHelperBase uiHelperBase)
         {
             try
             {
