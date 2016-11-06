@@ -5,8 +5,9 @@
     using System.IO;
     using System.Linq;
     using System.Xml.Serialization;
-    using SexyFishHorse.CitiesSkylines.Infrastructure.IO;
-    using SexyFishHorse.CitiesSkylines.Infrastructure.Validation.Arguments;
+    using IO;
+    using JetBrains.Annotations;
+    using Validation.Arguments;
 
     public class ConfigStore : IConfigStore
     {
@@ -25,7 +26,10 @@
 
             serializer = new XmlSerializer(typeof(ModConfiguration));
 
-            EnsureFileExists();
+            if (!ConfigFileInfo.Exists)
+            {
+                SaveConfigToFile(new ModConfiguration());
+            }
         }
 
         public FileInfo ConfigFileInfo { get; private set; }
@@ -38,7 +42,7 @@
 
             if (modConfiguration.Settings.Any(x => x.Key == key))
             {
-                return (T)modConfiguration.Settings.Single(x => x.Key == key).Value;
+                return (T) modConfiguration.Settings.Single(x => x.Key == key).Value;
             }
 
             return default(T);
@@ -88,14 +92,6 @@
             SaveConfigToFile(modConfiguration);
         }
 
-        private void EnsureFileExists()
-        {
-            if (!ConfigFileInfo.Exists)
-            {
-                SaveConfigToFile(new ModConfiguration());
-            }
-        }
-
         private ModConfiguration LoadConfigFromFile()
         {
             if (!ConfigFileInfo.Exists)
@@ -103,22 +99,15 @@
                 return new ModConfiguration();
             }
 
-            try
+            using (var fileStream = ConfigFileInfo.OpenRead())
             {
-                using (var fileStream = ConfigFileInfo.OpenRead())
-                {
-                    var config = serializer.Deserialize(fileStream) as ModConfiguration;
+                var config = serializer.Deserialize(fileStream) as ModConfiguration;
 
-                    return config ?? new ModConfiguration();
-                }
-            }
-            catch (InvalidOperationException)
-            {
-                return new ModConfiguration();
+                return config ?? new ModConfiguration();
             }
         }
 
-        private void SaveConfigToFile(ModConfiguration modConfiguration)
+        private void SaveConfigToFile([NotNull] ModConfiguration modConfiguration)
         {
             using (var fileStream = ConfigFileInfo.Open(FileMode.Create, FileAccess.Write))
             {
