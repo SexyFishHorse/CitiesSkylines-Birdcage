@@ -4,7 +4,7 @@
     using System.Collections;
     using JetBrains.Annotations;
 
-    public static class ICollectionExtensions
+    public static class CollectionExtensions
     {
         [AssertionMethod]
         public static void ShouldNotBeNullOrEmpty(

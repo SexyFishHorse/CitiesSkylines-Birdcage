@@ -5,8 +5,9 @@
     using System.IO;
     using System.Linq;
     using System.Xml.Serialization;
-    using SexyFishHorse.CitiesSkylines.Infrastructure.IO;
-    using SexyFishHorse.CitiesSkylines.Infrastructure.Validation.Arguments;
+    using IO;
+    using JetBrains.Annotations;
+    using Validation.Arguments;
 
     public class ConfigStore : IConfigStore
     {
@@ -24,6 +25,11 @@
             ConfigFileInfo = new FileInfo(Path.Combine(modFolderPath, ConfigFileName));
 
             serializer = new XmlSerializer(typeof(ModConfiguration));
+
+            if (!ConfigFileInfo.Exists)
+            {
+                SaveConfigToFile(new ModConfiguration());
+            }
         }
 
         public FileInfo ConfigFileInfo { get; private set; }
@@ -36,7 +42,7 @@
 
             if (modConfiguration.Settings.Any(x => x.Key == key))
             {
-                return (T)modConfiguration.Settings.Single(x => x.Key == key).Value;
+                return (T) modConfiguration.Settings.Single(x => x.Key == key).Value;
             }
 
             return default(T);
@@ -68,7 +74,7 @@
             {
                 var message =
                     string.Format(
-                        "The configuration value for the key {0} is null. Use RemoveSetting to remove a value", 
+                        "The configuration value for the key {0} is null. Use RemoveSetting to remove a value",
                         key);
 
                 throw new ArgumentNullException("value", message);
@@ -101,7 +107,7 @@
             }
         }
 
-        private void SaveConfigToFile(ModConfiguration modConfiguration)
+        private void SaveConfigToFile([NotNull] ModConfiguration modConfiguration)
         {
             using (var fileStream = ConfigFileInfo.Open(FileMode.Create, FileAccess.Write))
             {

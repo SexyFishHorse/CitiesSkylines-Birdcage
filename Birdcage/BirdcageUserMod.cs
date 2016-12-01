@@ -212,6 +212,8 @@
             {
                 chirper.SetBuiltinChirperFree(true);
             }
+
+            configStore.SaveSetting(SettingKeys.Draggable, isDraggable);
         }
 
         private void ToggleFilter(bool shouldFilter)
