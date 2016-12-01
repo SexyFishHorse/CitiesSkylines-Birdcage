@@ -1,15 +1,15 @@
 ﻿namespace SexyFishHorse.CitiesSkylines.Birdcage
 {
     using System;
-    using ColossalFramework.Plugins;
     using ICities;
-    using SexyFishHorse.CitiesSkylines.Infrastructure;
-    using SexyFishHorse.CitiesSkylines.Infrastructure.Configuration;
-    using SexyFishHorse.CitiesSkylines.Infrastructure.UI;
-    using SexyFishHorse.CitiesSkylines.Logger;
+    using Infrastructure;
+    using Infrastructure.Configuration;
+    using Infrastructure.UI;
+    using Logger;
     using UnityEngine;
+    using ILogger = Logger.ILogger;
 
-    public class BirdcageUserMod : ChirperExtensionBase, IUserModWithOptionsPanel
+    public class BirdcageUserMod : ChirperExtensionBase, IUserModWithOptionsPanel<BirdcageUserMod>, IUserMod
     {
         private const string ModName = "Birdcage";
 
@@ -28,6 +28,8 @@
         private bool dragging;
 
         private bool filterNonImportantMessages;
+
+        private bool initialized;
 
         public BirdcageUserMod()
         {
@@ -59,34 +61,6 @@
         }
 
         public AudioClip NotificationSound { get; set; }
-
-        public override void OnCreated(IChirper c)
-        {
-            base.OnCreated(c);
-
-            positionService.Chirper = c;
-            positionService.DefaultPosition = chirper.builtinChirperPosition;
-            positionService.UiView = ChirpPanel.instance.component.GetUIView();
-
-            NotificationSound = ChirpPanel.instance.m_NotificationSound;
-
-            if (draggable)
-            {
-                c.SetBuiltinChirperFree(true);
-
-                if (configStore.HasSetting(SettingKeys.ChirperPositionX))
-                {
-                    var chirperX = configStore.GetSetting<int>(SettingKeys.ChirperPositionX);
-                    var chirperY = configStore.GetSetting<int>(SettingKeys.ChirperPositionY);
-                    var chirperPosition = new Vector2(chirperX, chirperY);
-
-                    positionService.UpdateChirperPosition(chirperPosition);
-                }
-            }
-
-            var hideChirper = configStore.GetSetting<bool>(SettingKeys.HideChirper);
-            chirper.ShowBuiltinChirper(!hideChirper);
-        }
 
         public override void OnNewMessage(IChirperMessage message)
         {
@@ -122,12 +96,14 @@
             }
             catch (Exception ex)
             {
-                logger.LogException(ex, PluginManager.MessageType.Error);
+                logger.LogException(ex);
             }
         }
 
         public override void OnUpdate()
         {
+            Initialize();
+
             try
             {
                 if (ChirpPanel.instance == null)
@@ -165,12 +141,51 @@
             }
             catch (Exception ex)
             {
-                logger.LogException(ex, PluginManager.MessageType.Error);
+                logger.LogException(ex);
             }
+        }
+
+        // TODO: Move this to OnCreated when CO fixes the initial state position mismatch
+        private void Initialize()
+        {
+            if (initialized)
+            {
+                return;
+            }
+
+            positionService.Chirper = chirper;
+            positionService.DefaultPosition = chirper.builtinChirperPosition;
+            positionService.UiView = ChirpPanel.instance.component.GetUIView();
+
+            NotificationSound = ChirpPanel.instance.m_NotificationSound;
+
+            if (draggable)
+            {
+                chirper.SetBuiltinChirperFree(true);
+
+                if (configStore.HasSetting(SettingKeys.ChirperPositionX))
+                {
+                    var chirperX = configStore.GetSetting<int>(SettingKeys.ChirperPositionX);
+                    var chirperY = configStore.GetSetting<int>(SettingKeys.ChirperPositionY);
+                    var chirperPosition = new Vector2(chirperX, chirperY);
+
+                    positionService.UpdateChirperPosition(chirperPosition);
+                }
+            }
+
+            var hideChirper = configStore.GetSetting<bool>(SettingKeys.HideChirper);
+            chirper.ShowBuiltinChirper(!hideChirper);
+
+            initialized = true;
         }
 
         private void ResetPosition()
         {
+            if (chirper == null)
+            {
+                return;
+            }
+
             positionService.ResetPosition();
 
             SaveChirperPosition();
@@ -178,8 +193,8 @@
 
         private void SaveChirperPosition()
         {
-            configStore.SaveSetting(SettingKeys.ChirperPositionX, (int)chirper.builtinChirperPosition.x);
-            configStore.SaveSetting(SettingKeys.ChirperPositionY, (int)chirper.builtinChirperPosition.y);
+            configStore.SaveSetting(SettingKeys.ChirperPositionX, (int) chirper.builtinChirperPosition.x);
+            configStore.SaveSetting(SettingKeys.ChirperPositionY, (int) chirper.builtinChirperPosition.y);
         }
 
         private void StopDragging()
@@ -201,7 +216,7 @@
             }
             catch (Exception ex)
             {
-                logger.LogException(ex, PluginManager.MessageType.Error);
+                logger.LogException(ex);
             }
         }
 
@@ -226,7 +241,7 @@
             }
             catch (Exception ex)
             {
-                logger.LogException(ex, PluginManager.MessageType.Error);
+                logger.LogException(ex);
             }
         }
     }
