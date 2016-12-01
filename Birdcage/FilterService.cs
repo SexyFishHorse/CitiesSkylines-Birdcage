@@ -38,7 +38,7 @@
                 return;
             }
 
-            ChirpPanel.instance.Collapse();
+            ChirperUtils.CollapseChirperInstantly();
 
             foreach (var chirperMessage in messagesToRemove)
             {

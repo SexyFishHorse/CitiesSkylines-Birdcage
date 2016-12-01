@@ -16,15 +16,16 @@
 
         private const int ChirperTopBound = 30;
 
-        public IChirper Chirper { get; set; }
+        public IChirper Chirper { private get; set; }
 
-        public Vector2 DefaultPosition { get; set; }
+        public Vector2 DefaultPosition { private get; set; }
 
-        public UIView UiView { get; set; }
+        public UIView UiView { private get; set; }
 
         public void Dragging()
         {
-            ChirpPanel.instance.Collapse();
+            ChirperUtils.CollapseChirperInstantly();
+
             var mousePosition = GetMouseGuiPosition();
 
             mousePosition = EnsurePositionIsOnScreen(mousePosition);
@@ -43,6 +44,8 @@
 
         public void ResetPosition()
         {
+            ChirperUtils.CollapseChirperInstantly();
+
             Chirper.builtinChirperPosition = DefaultPosition;
             Chirper.SetBuiltinChirperAnchor(ChirperAnchor.TopCenter);
         }
