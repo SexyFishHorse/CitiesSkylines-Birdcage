@@ -23,7 +23,7 @@
 
         private bool initialized;
 
-        private IChirper chirper;
+        private IChirper chirperWrapper;
 
         public BirdcageUserMod()
         {
@@ -60,16 +60,35 @@
 
         public void OnNewMessage(IChirperMessage message)
         {
-            if (ModConfig.Instance.GetSetting<bool>(SettingKeys.FilterMessages))
+            try
             {
-                filterService.HandleNewMessage(message);
+                if (ModConfig.Instance.GetSetting<bool>(SettingKeys.FilterMessages))
+                {
+                    filterService.HandleNewMessage(message);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogException(ex);
+
+                throw;
             }
         }
 
         public void OnCreated(IChirper chirper)
         {
-            this.chirper = chirper;
-            ((OptionsPanelManager)OptionsPanelManager).Chirper = chirper;
+            try
+            {
+                chirperWrapper = chirper;
+                ((OptionsPanelManager)OptionsPanelManager).Chirper = chirper;
+            }
+            catch (Exception ex)
+            {
+
+                logger.LogException(ex);
+
+                throw;
+            }
         }
 
         public void OnReleased()
@@ -78,10 +97,10 @@
 
         public void OnUpdate()
         {
-            Initialize();
-
             try
             {
+                Initialize();
+
                 if (ChirpPanel.instance == null)
                 {
                     return;
@@ -118,6 +137,8 @@
             catch (Exception ex)
             {
                 logger.LogException(ex);
+
+                throw;
             }
         }
 
@@ -129,15 +150,15 @@
                 return;
             }
 
-            positionService.Chirper = chirper;
-            positionService.DefaultPosition = chirper.builtinChirperPosition;
+            positionService.Chirper = chirperWrapper;
+            positionService.DefaultPosition = chirperWrapper.builtinChirperPosition;
             positionService.UiView = ChirpPanel.instance.component.GetUIView();
 
             NotificationSound = ChirpPanel.instance.m_NotificationSound;
 
             if (ModConfig.Instance.GetSetting<bool>(SettingKeys.Draggable))
             {
-                chirper.SetBuiltinChirperFree(true);
+                chirperWrapper.SetBuiltinChirperFree(true);
 
                 if (ModConfig.Instance.GetSetting<int>(SettingKeys.ChirperPositionX) > 0)
                 {
@@ -150,7 +171,7 @@
             }
 
             var hideChirper = ModConfig.Instance.GetSetting<bool>(SettingKeys.HideChirper);
-            chirper.ShowBuiltinChirper(!hideChirper);
+            chirperWrapper.ShowBuiltinChirper(!hideChirper);
 
             initialized = true;
         }
