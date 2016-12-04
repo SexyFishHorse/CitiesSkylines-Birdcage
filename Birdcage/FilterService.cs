@@ -57,11 +57,13 @@
                 case LocaleID.CHIRP_ABANDONED_BUILDINGS:
                 case LocaleID.CHIRP_COMMERCIAL_DEMAND:
                 case LocaleID.CHIRP_DEAD_PILING_UP:
+                case LocaleID.CHIRP_DISASTER:
                 case LocaleID.CHIRP_FIRE_HAZARD:
                 case LocaleID.CHIRP_HIGH_CRIME:
                 case LocaleID.CHIRP_INDUSTRIAL_DEMAND:
                 case LocaleID.CHIRP_LOW_HAPPINESS:
                 case LocaleID.CHIRP_LOW_HEALTH:
+                case LocaleID.CHIRP_MILESTONE_REACHED:
                 case LocaleID.CHIRP_NEED_MORE_PARKS:
                 case LocaleID.CHIRP_NEW_MAP_TILE:
                 case LocaleID.CHIRP_NOISEPOLLUTION:
@@ -75,6 +77,20 @@
                 case LocaleID.CHIRP_RESIDENTIAL_DEMAND:
                 case LocaleID.CHIRP_SEWAGE:
                 case LocaleID.CHIRP_TRASH_PILING_UP:
+                case LocaleID.EDITORCHIRPER_REQUIREMENTS:
+                case LocaleID.EDITORCHIRPER_REQUIREMENTS_FERTILITY:
+                case LocaleID.EDITORCHIRPER_REQUIREMENTS_FOREST:
+                case LocaleID.EDITORCHIRPER_REQUIREMENTS_OIL:
+                case LocaleID.EDITORCHIRPER_REQUIREMENTS_ORE:
+                case LocaleID.EDITORCHIRPER_REQUIREMENTS_PLANE:
+                case LocaleID.EDITORCHIRPER_REQUIREMENTS_RECOMMENDED:
+                case LocaleID.EDITORCHIRPER_REQUIREMENTS_ROADIN:
+                case LocaleID.EDITORCHIRPER_REQUIREMENTS_ROADOUT:
+                case LocaleID.EDITORCHIRPER_REQUIREMENTS_SHIP:
+                case LocaleID.EDITORCHIRPER_REQUIREMENTS_TRAIN:
+                case LocaleID.EDITORCHIRPER_REQUIREMENTS_WATER:
+                case LocaleID.FOOTBALLCHIRP_LOSE:
+                case LocaleID.FOOTBALLCHIRP_WIN:
                     return false;
                 default:
                     return true;
