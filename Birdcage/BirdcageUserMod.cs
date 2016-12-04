@@ -3,17 +3,13 @@
     using System;
     using ICities;
     using Infrastructure;
-    using Infrastructure.Configuration;
-    using Infrastructure.UI;
     using Logger;
     using UnityEngine;
     using ILogger = Logger.ILogger;
 
-    public class BirdcageUserMod : ChirperExtensionBase, IUserModWithOptionsPanel<BirdcageUserMod>, IUserMod
+    public class BirdcageUserMod : UserModBase, IChirperExtension
     {
-        private const string ModName = "Birdcage";
-
-        private readonly IConfigStore configStore;
+        public const string ModName = "Birdcage";
 
         private readonly FilterService filterService;
 
@@ -23,28 +19,24 @@
 
         private readonly PositionService positionService;
 
-        private bool draggable;
-
         private bool dragging;
-
-        private bool filterNonImportantMessages;
 
         private bool initialized;
 
+        private IChirper chirper;
+
         public BirdcageUserMod()
         {
-            configStore = new ConfigStore(ModName);
+            logger = LogManager.Instance.GetOrCreateLogger(ModName);
+
             filterService = new FilterService();
             inputService = new InputService();
             positionService = new PositionService();
 
-            logger = LogManager.Instance.GetOrCreateLogger(ModName);
-
-            filterNonImportantMessages = configStore.GetSetting<bool>(SettingKeys.FilterMessages);
-            draggable = configStore.GetSetting<bool>(SettingKeys.Draggable);
+            OptionsPanelManager = new OptionsPanelManager(logger, positionService);
         }
 
-        public string Description
+        public override string Description
         {
             get
             {
@@ -52,7 +44,7 @@
             }
         }
 
-        public string Name
+        public override string Name
         {
             get
             {
@@ -62,45 +54,29 @@
 
         public AudioClip NotificationSound { get; set; }
 
-        public override void OnNewMessage(IChirperMessage message)
+        public void OnMessagesUpdated()
         {
-            if (filterNonImportantMessages)
+        }
+
+        public void OnNewMessage(IChirperMessage message)
+        {
+            if (ModConfig.Instance.GetSetting<bool>(SettingKeys.FilterMessages))
             {
                 filterService.HandleNewMessage(message);
             }
         }
 
-        public void OnSettingsUI(UIHelperBase uiHelperBase)
+        public void OnCreated(IChirper chirper)
         {
-            try
-            {
-                var uiHelper = uiHelperBase.AsStronglyTyped();
-
-                var appearanceGroup = uiHelper.AddGroup("Appearance");
-                var behaviourGroup = uiHelper.AddGroup("Behaviour");
-
-                appearanceGroup.AddCheckBox(
-                    "Hide chirper",
-                    configStore.GetSetting<bool>(SettingKeys.HideChirper),
-                    ToggleChirper);
-                appearanceGroup.AddCheckBox(
-                    "Make Chirper draggable (hold ctrl + left mouse button)",
-                    configStore.GetSetting<bool>(SettingKeys.Draggable),
-                    ToggleDraggable);
-                appearanceGroup.AddButton("Reset Chirper position", ResetPosition);
-
-                behaviourGroup.AddCheckBox(
-                    "Filter non-important messages",
-                    configStore.GetSetting<bool>(SettingKeys.FilterMessages),
-                    ToggleFilter);
-            }
-            catch (Exception ex)
-            {
-                logger.LogException(ex);
-            }
+            this.chirper = chirper;
+            ((OptionsPanelManager)OptionsPanelManager).Chirper = chirper;
         }
 
-        public override void OnUpdate()
+        public void OnReleased()
+        {
+        }
+
+        public void OnUpdate()
         {
             Initialize();
 
@@ -111,12 +87,12 @@
                     return;
                 }
 
-                if (filterNonImportantMessages)
+                if (ModConfig.Instance.GetSetting<bool>(SettingKeys.FilterMessages))
                 {
                     filterService.RemovePendingMessages(NotificationSound);
                 }
 
-                if (draggable)
+                if (ModConfig.Instance.GetSetting<bool>(SettingKeys.Draggable))
                 {
                     inputService.SetPrimaryMouseButtonDownState();
                     inputService.SetAnyControlDownState();
@@ -159,90 +135,30 @@
 
             NotificationSound = ChirpPanel.instance.m_NotificationSound;
 
-            if (draggable)
+            if (ModConfig.Instance.GetSetting<bool>(SettingKeys.Draggable))
             {
                 chirper.SetBuiltinChirperFree(true);
 
-                if (configStore.HasSetting(SettingKeys.ChirperPositionX))
+                if (ModConfig.Instance.GetSetting<int>(SettingKeys.ChirperPositionX) > 0)
                 {
-                    var chirperX = configStore.GetSetting<int>(SettingKeys.ChirperPositionX);
-                    var chirperY = configStore.GetSetting<int>(SettingKeys.ChirperPositionY);
+                    var chirperX = ModConfig.Instance.GetSetting<int>(SettingKeys.ChirperPositionX);
+                    var chirperY = ModConfig.Instance.GetSetting<int>(SettingKeys.ChirperPositionY);
                     var chirperPosition = new Vector2(chirperX, chirperY);
 
                     positionService.UpdateChirperPosition(chirperPosition);
                 }
             }
 
-            var hideChirper = configStore.GetSetting<bool>(SettingKeys.HideChirper);
+            var hideChirper = ModConfig.Instance.GetSetting<bool>(SettingKeys.HideChirper);
             chirper.ShowBuiltinChirper(!hideChirper);
 
             initialized = true;
         }
 
-        private void ResetPosition()
-        {
-            if (chirper == null)
-            {
-                return;
-            }
-
-            positionService.ResetPosition();
-
-            SaveChirperPosition();
-        }
-
-        private void SaveChirperPosition()
-        {
-            configStore.SaveSetting(SettingKeys.ChirperPositionX, (int) chirper.builtinChirperPosition.x);
-            configStore.SaveSetting(SettingKeys.ChirperPositionY, (int) chirper.builtinChirperPosition.y);
-        }
-
         private void StopDragging()
         {
             positionService.UpdateChirperAnchor();
-            SaveChirperPosition();
-        }
-
-        private void ToggleChirper(bool hideChirper)
-        {
-            try
-            {
-                configStore.SaveSetting(SettingKeys.HideChirper, hideChirper);
-
-                if (ChirpPanel.instance != null)
-                {
-                    ChirpPanel.instance.gameObject.SetActive(!hideChirper);
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.LogException(ex);
-            }
-        }
-
-        private void ToggleDraggable(bool isDraggable)
-        {
-            draggable = isDraggable;
-            if (chirper != null)
-            {
-                chirper.SetBuiltinChirperFree(true);
-            }
-
-            configStore.SaveSetting(SettingKeys.Draggable, isDraggable);
-        }
-
-        private void ToggleFilter(bool shouldFilter)
-        {
-            try
-            {
-                filterNonImportantMessages = shouldFilter;
-
-                configStore.SaveSetting(SettingKeys.FilterMessages, shouldFilter);
-            }
-            catch (Exception ex)
-            {
-                logger.LogException(ex);
-            }
+            positionService.SaveChirperPosition();
         }
     }
 }

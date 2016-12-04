@@ -126,5 +126,11 @@
 
             return mouseGuiPos;
         }
+
+        public void SaveChirperPosition()
+        {
+            ModConfig.Instance.SaveSetting(SettingKeys.ChirperPositionX, (int)Chirper.builtinChirperPosition.x);
+            ModConfig.Instance.SaveSetting(SettingKeys.ChirperPositionY, (int)Chirper.builtinChirperPosition.y);
+        }
     }
 }
