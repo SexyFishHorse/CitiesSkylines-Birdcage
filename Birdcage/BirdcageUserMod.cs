@@ -106,6 +106,11 @@
                     return;
                 }
 
+                if (ModConfig.Instance.GetSetting<bool>(SettingKeys.HideChirper))
+                {
+                    return;
+                }
+
                 if (ModConfig.Instance.GetSetting<bool>(SettingKeys.FilterMessages))
                 {
                     filterService.RemovePendingMessages(NotificationSound);
