@@ -2,8 +2,8 @@
 {
     using System;
     using ICities;
-    using Infrastructure.Configuration;
     using Infrastructure.UI;
+    using Infrastructure.UI.Configuration;
     using Logger;
 
     public class OptionsPanelManager : IOptionsPanelManager
