@@ -8,7 +8,7 @@
     using SexyFishHorse.CitiesSkylines.Infrastructure;
     using UnityEngine;
     using ILogger = SexyFishHorse.CitiesSkylines.Logger.ILogger;
-    using Object = UnityEngine.Object;
+    using UnityObject = UnityEngine.Object;
 
     public class BirdcageUserMod : UserModBase, IChirperExtension
     {
@@ -22,13 +22,13 @@
 
         private readonly PositionService positionService;
 
+        private UIButton chirpButton;
+
         private IChirper chirperWrapper;
 
         private bool dragging;
 
         private bool initialized;
-
-        private UIButton chirpButton;
 
         public BirdcageUserMod()
         {
@@ -39,6 +39,15 @@
             positionService = new PositionService();
 
             OptionsPanelManager = new OptionsPanelManager(logger, positionService);
+        }
+
+        [SuppressMessage("ReSharper", "StyleCop.SA1121", Justification = "Referencing Unity object class.")]
+        public UIButton ChirpButton
+        {
+            get
+            {
+                return chirpButton ?? (chirpButton = UnityObject.FindObjectsOfType<UIButton>().FirstOrDefault(x => x.name == "Zone"));
+            }
         }
 
         public override string Description
@@ -58,15 +67,6 @@
         }
 
         public AudioClip NotificationSound { get; set; }
-
-        [SuppressMessage("ReSharper", "StyleCop.SA1121", Justification = "Referencing Unity object class.")]
-        public UIButton ChirpButton
-        {
-            get
-            {
-                return chirpButton ?? (chirpButton = Object.FindObjectsOfType<UIButton>().FirstOrDefault(x => x.name == "Zone"));
-            }
-        }
 
         public void OnCreated(IChirper chirper)
         {
@@ -131,25 +131,7 @@
 
                 if (ModConfig.Instance.GetSetting<bool>(SettingKeys.Draggable))
                 {
-                    inputService.SetPrimaryMouseButtonDownState();
-                    inputService.SetAnyControlDownState();
-
-                    if (dragging && !inputService.PrimaryMouseButtonDownState)
-                    {
-                        dragging = false;
-                        StopDragging();
-                    }
-                    else if (!dragging && inputService.PrimaryMouseButtonDownState && inputService.AnyControlDown)
-                    {
-                        if (positionService.IsMouseOnChirper())
-                        {
-                            StartDragging();
-                        }
-                    }
-                    else if (dragging)
-                    {
-                        positionService.Dragging();
-                    }
+                    ProcessDragging();
                 }
             }
             catch (Exception ex)
@@ -157,16 +139,6 @@
                 logger.LogException(ex);
 
                 throw;
-            }
-        }
-
-        private void StartDragging()
-        {
-            ChirperUtils.CollapseChirperInstantly();
-            dragging = true;
-            if (ChirpButton != null)
-            {
-                ChirpButton.isEnabled = false;
             }
         }
 
@@ -204,8 +176,44 @@
             initialized = true;
         }
 
+        private void ProcessDragging()
+        {
+            inputService.SetPrimaryMouseButtonDownState();
+            inputService.SetAnyControlDownState();
+
+            if (inputService.PrimaryMouseButtonDownState && inputService.AnyControlDown)
+            {
+                if (dragging)
+                {
+                    positionService.Dragging();
+                }
+                else
+                {
+                    if (positionService.IsMouseOnChirper())
+                    {
+                        StartDragging();
+                    }
+                    else
+                    {
+                        StopDragging();
+                    }
+                }
+            }
+        }
+
+        private void StartDragging()
+        {
+            ChirperUtils.CollapseChirperInstantly();
+            dragging = true;
+            if (ChirpButton != null)
+            {
+                ChirpButton.isEnabled = false;
+            }
+        }
+
         private void StopDragging()
         {
+            dragging = false;
             positionService.UpdateChirperAnchor();
             positionService.SaveChirperPosition();
 
