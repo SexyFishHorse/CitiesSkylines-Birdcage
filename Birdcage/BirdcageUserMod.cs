@@ -114,6 +114,8 @@
             {
                 Initialize();
 
+                inputService.Update();
+
                 if (ChirpPanel.instance == null)
                 {
                     return;
@@ -178,9 +180,6 @@
 
         private void ProcessDragging()
         {
-            inputService.SetPrimaryMouseButtonDownState();
-            inputService.SetAnyControlDownState();
-
             if (inputService.PrimaryMouseButtonDownState && inputService.AnyControlDown)
             {
                 if (dragging)
@@ -193,16 +192,23 @@
                     {
                         StartDragging();
                     }
-                    else
-                    {
-                        StopDragging();
-                    }
                 }
+            }
+            else
+            {
+                StopDragging();
             }
         }
 
         private void StartDragging()
         {
+            if (dragging)
+            {
+                return;
+            }
+
+            logger.Info("Start dragging");
+
             ChirperUtils.CollapseChirperInstantly();
             dragging = true;
             if (ChirpButton != null)
@@ -213,6 +219,13 @@
 
         private void StopDragging()
         {
+            if (dragging == false)
+            {
+                return;
+            }
+
+            logger.Info("Stop dragging");
+
             dragging = false;
             positionService.UpdateChirperAnchor();
             positionService.SaveChirperPosition();

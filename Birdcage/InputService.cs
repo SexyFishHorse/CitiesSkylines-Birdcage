@@ -4,24 +4,50 @@
 
     public class InputService
     {
-        public bool AnyControlDown { get; private set; }
+        private bool leftCtrlDown;
 
-        public bool PrimaryMouseButtonDownState { get; private set; }
+        private bool rightCtrlDown;
 
-        public void SetAnyControlDownState()
+        public bool AnyControlDown
         {
-            if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl))
+            get
             {
-                AnyControlDown = true;
-            }
-            else if ((Input.GetKeyUp(KeyCode.LeftControl) && !Input.GetKey(KeyCode.RightControl))
-                     || (Input.GetKeyUp(KeyCode.RightControl) && !Input.GetKey(KeyCode.LeftCommand)))
-            {
-                AnyControlDown = false;
+                return leftCtrlDown || rightCtrlDown;
             }
         }
 
-        public void SetPrimaryMouseButtonDownState()
+        public bool PrimaryMouseButtonDownState { get; private set; }
+
+        public void Update()
+        {
+            SetAnyControlDownState();
+            SetPrimaryMouseButtonDownState();
+        }
+
+        private void SetAnyControlDownState()
+        {
+            if (Input.GetKeyDown(KeyCode.LeftControl))
+            {
+                leftCtrlDown = true;
+            }
+
+            if (Input.GetKeyUp(KeyCode.LeftControl))
+            {
+                leftCtrlDown = false;
+            }
+
+            if (Input.GetKeyDown(KeyCode.RightControl))
+            {
+                rightCtrlDown = true;
+            }
+
+            if (Input.GetKeyUp(KeyCode.RightControl))
+            {
+                rightCtrlDown = false;
+            }
+        }
+
+        private void SetPrimaryMouseButtonDownState()
         {
             if (Input.GetMouseButtonDown(0))
             {
