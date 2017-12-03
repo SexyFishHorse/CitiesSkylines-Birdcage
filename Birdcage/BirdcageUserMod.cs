@@ -1,11 +1,14 @@
 ﻿namespace SexyFishHorse.CitiesSkylines.Birdcage
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
+    using ColossalFramework.UI;
     using ICities;
-    using Infrastructure;
-    using Logger;
+    using SexyFishHorse.CitiesSkylines.Infrastructure;
     using UnityEngine;
-    using ILogger = Logger.ILogger;
+    using ILogger = SexyFishHorse.CitiesSkylines.Logger.ILogger;
+    using Object = UnityEngine.Object;
 
     public class BirdcageUserMod : UserModBase, IChirperExtension
     {
@@ -19,15 +22,17 @@
 
         private readonly PositionService positionService;
 
+        private IChirper chirperWrapper;
+
         private bool dragging;
 
         private bool initialized;
 
-        private IChirper chirperWrapper;
+        private UIButton chirpButton;
 
         public BirdcageUserMod()
         {
-            logger = LogManager.Instance.GetOrCreateLogger(ModName);
+            logger = BirdcageLogger.Instance;
 
             filterService = new FilterService();
             inputService = new InputService();
@@ -54,6 +59,30 @@
 
         public AudioClip NotificationSound { get; set; }
 
+        [SuppressMessage("ReSharper", "StyleCop.SA1121", Justification = "Referencing Unity object class.")]
+        public UIButton ChirpButton
+        {
+            get
+            {
+                return chirpButton ?? (chirpButton = Object.FindObjectsOfType<UIButton>().FirstOrDefault(x => x.name == "Zone"));
+            }
+        }
+
+        public void OnCreated(IChirper chirper)
+        {
+            try
+            {
+                chirperWrapper = chirper;
+                ((OptionsPanelManager)OptionsPanelManager).Chirper = chirper;
+            }
+            catch (Exception ex)
+            {
+                logger.LogException(ex);
+
+                throw;
+            }
+        }
+
         public void OnMessagesUpdated()
         {
         }
@@ -69,22 +98,6 @@
             }
             catch (Exception ex)
             {
-                logger.LogException(ex);
-
-                throw;
-            }
-        }
-
-        public void OnCreated(IChirper chirper)
-        {
-            try
-            {
-                chirperWrapper = chirper;
-                ((OptionsPanelManager)OptionsPanelManager).Chirper = chirper;
-            }
-            catch (Exception ex)
-            {
-
                 logger.LogException(ex);
 
                 throw;
@@ -130,7 +143,7 @@
                     {
                         if (positionService.IsMouseOnChirper())
                         {
-                            dragging = true;
+                            StartDragging();
                         }
                     }
                     else if (dragging)
@@ -144,6 +157,16 @@
                 logger.LogException(ex);
 
                 throw;
+            }
+        }
+
+        private void StartDragging()
+        {
+            ChirperUtils.CollapseChirperInstantly();
+            dragging = true;
+            if (ChirpButton != null)
+            {
+                ChirpButton.isEnabled = false;
             }
         }
 
@@ -185,6 +208,11 @@
         {
             positionService.UpdateChirperAnchor();
             positionService.SaveChirperPosition();
+
+            if (ChirpButton != null)
+            {
+                ChirpButton.isEnabled = true;
+            }
         }
     }
 }

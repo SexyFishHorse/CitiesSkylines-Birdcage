@@ -7,6 +7,7 @@
     {
         public static void CollapseChirperInstantly()
         {
+            ChirpPanel.instance.Collapse();
             if (ChirpPanel.instance == null)
             {
                 return;

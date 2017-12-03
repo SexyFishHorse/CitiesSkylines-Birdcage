@@ -7,12 +7,48 @@
 
     public class FilterService
     {
-        private readonly HashSet<IChirperMessage> messagesToRemove;
-
-        public FilterService()
+        private static readonly HashSet<string> AllowedMessages = new HashSet<string>
         {
-            messagesToRemove = new HashSet<IChirperMessage>();
-        }
+            LocaleID.CHIRP_ABANDONED_BUILDINGS,
+            LocaleID.CHIRP_COMMERCIAL_DEMAND,
+            LocaleID.CHIRP_DEAD_PILING_UP,
+            LocaleID.CHIRP_DISASTER,
+            LocaleID.CHIRP_FIRE_HAZARD,
+            LocaleID.CHIRP_HIGH_CRIME,
+            LocaleID.CHIRP_INDUSTRIAL_DEMAND,
+            LocaleID.CHIRP_LOW_HAPPINESS,
+            LocaleID.CHIRP_LOW_HEALTH,
+            LocaleID.CHIRP_MILESTONE_REACHED,
+            LocaleID.CHIRP_NEED_MORE_PARKS,
+            LocaleID.CHIRP_NEW_MAP_TILE,
+            LocaleID.CHIRP_NOISEPOLLUTION,
+            LocaleID.CHIRP_NO_ELECTRICITY,
+            LocaleID.CHIRP_NO_HEALTHCARE,
+            LocaleID.CHIRP_NO_PRISONS,
+            LocaleID.CHIRP_NO_SCHOOLS,
+            LocaleID.CHIRP_NO_WATER,
+            LocaleID.CHIRP_POISONED,
+            LocaleID.CHIRP_POLLUTION,
+            LocaleID.CHIRP_RESIDENTIAL_DEMAND,
+            LocaleID.CHIRP_SEWAGE,
+            LocaleID.CHIRP_TRASH_PILING_UP,
+            LocaleID.EDITORCHIRPER_REQUIREMENTS,
+            LocaleID.EDITORCHIRPER_REQUIREMENTS_FERTILITY,
+            LocaleID.EDITORCHIRPER_REQUIREMENTS_FOREST,
+            LocaleID.EDITORCHIRPER_REQUIREMENTS_OIL,
+            LocaleID.EDITORCHIRPER_REQUIREMENTS_ORE,
+            LocaleID.EDITORCHIRPER_REQUIREMENTS_PLANE,
+            LocaleID.EDITORCHIRPER_REQUIREMENTS_RECOMMENDED,
+            LocaleID.EDITORCHIRPER_REQUIREMENTS_ROADIN,
+            LocaleID.EDITORCHIRPER_REQUIREMENTS_ROADOUT,
+            LocaleID.EDITORCHIRPER_REQUIREMENTS_SHIP,
+            LocaleID.EDITORCHIRPER_REQUIREMENTS_TRAIN,
+            LocaleID.EDITORCHIRPER_REQUIREMENTS_WATER,
+            LocaleID.FOOTBALLCHIRP_LOSE,
+            LocaleID.FOOTBALLCHIRP_WIN,
+        };
+
+        private readonly HashSet<IChirperMessage> messagesToRemove = new HashSet<IChirperMessage>();
 
         public void HandleNewMessage(IChirperMessage message)
         {
@@ -22,18 +58,16 @@
                 return;
             }
 
-            if (!ShouldFilterMessage(citizenMessage))
+            if (AllowedMessages.Contains(citizenMessage.m_messageID))
             {
-                return;
+                messagesToRemove.Add(message);
+                ChirpPanel.instance.m_NotificationSound = null;
             }
-
-            messagesToRemove.Add(message);
-            ChirpPanel.instance.m_NotificationSound = null;
         }
 
         public void RemovePendingMessages(AudioClip notificationSound)
         {
-            if (!messagesToRemove.Any())
+            if (messagesToRemove.Any())
             {
                 return;
             }
@@ -48,53 +82,6 @@
             ChirpPanel.instance.SynchronizeMessages();
             ChirpPanel.instance.m_NotificationSound = notificationSound;
             messagesToRemove.Clear();
-        }
-
-        private bool ShouldFilterMessage(CitizenMessage citizenMessage)
-        {
-            switch (citizenMessage.m_messageID)
-            {
-                case LocaleID.CHIRP_ABANDONED_BUILDINGS:
-                case LocaleID.CHIRP_COMMERCIAL_DEMAND:
-                case LocaleID.CHIRP_DEAD_PILING_UP:
-                case LocaleID.CHIRP_DISASTER:
-                case LocaleID.CHIRP_FIRE_HAZARD:
-                case LocaleID.CHIRP_HIGH_CRIME:
-                case LocaleID.CHIRP_INDUSTRIAL_DEMAND:
-                case LocaleID.CHIRP_LOW_HAPPINESS:
-                case LocaleID.CHIRP_LOW_HEALTH:
-                case LocaleID.CHIRP_MILESTONE_REACHED:
-                case LocaleID.CHIRP_NEED_MORE_PARKS:
-                case LocaleID.CHIRP_NEW_MAP_TILE:
-                case LocaleID.CHIRP_NOISEPOLLUTION:
-                case LocaleID.CHIRP_NO_ELECTRICITY:
-                case LocaleID.CHIRP_NO_HEALTHCARE:
-                case LocaleID.CHIRP_NO_PRISONS:
-                case LocaleID.CHIRP_NO_SCHOOLS:
-                case LocaleID.CHIRP_NO_WATER:
-                case LocaleID.CHIRP_POISONED:
-                case LocaleID.CHIRP_POLLUTION:
-                case LocaleID.CHIRP_RESIDENTIAL_DEMAND:
-                case LocaleID.CHIRP_SEWAGE:
-                case LocaleID.CHIRP_TRASH_PILING_UP:
-                case LocaleID.EDITORCHIRPER_REQUIREMENTS:
-                case LocaleID.EDITORCHIRPER_REQUIREMENTS_FERTILITY:
-                case LocaleID.EDITORCHIRPER_REQUIREMENTS_FOREST:
-                case LocaleID.EDITORCHIRPER_REQUIREMENTS_OIL:
-                case LocaleID.EDITORCHIRPER_REQUIREMENTS_ORE:
-                case LocaleID.EDITORCHIRPER_REQUIREMENTS_PLANE:
-                case LocaleID.EDITORCHIRPER_REQUIREMENTS_RECOMMENDED:
-                case LocaleID.EDITORCHIRPER_REQUIREMENTS_ROADIN:
-                case LocaleID.EDITORCHIRPER_REQUIREMENTS_ROADOUT:
-                case LocaleID.EDITORCHIRPER_REQUIREMENTS_SHIP:
-                case LocaleID.EDITORCHIRPER_REQUIREMENTS_TRAIN:
-                case LocaleID.EDITORCHIRPER_REQUIREMENTS_WATER:
-                case LocaleID.FOOTBALLCHIRP_LOSE:
-                case LocaleID.FOOTBALLCHIRP_WIN:
-                    return false;
-                default:
-                    return true;
-            }
         }
     }
 }

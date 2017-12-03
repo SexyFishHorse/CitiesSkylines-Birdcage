@@ -2,6 +2,8 @@
 {
     public static class SettingKeys
     {
+        public const string EnableLogging = "EnableLogging";
+
         public const string ChirperPositionX = "ChirperPositionX";
 
         public const string ChirperPositionY = "ChirperPositionY";

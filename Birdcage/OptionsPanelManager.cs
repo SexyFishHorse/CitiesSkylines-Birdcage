@@ -2,21 +2,21 @@
 {
     using System;
     using ICities;
-    using Infrastructure.UI;
-    using Infrastructure.UI.Configuration;
-    using Logger;
+    using SexyFishHorse.CitiesSkylines.Infrastructure.UI;
+    using SexyFishHorse.CitiesSkylines.Infrastructure.UI.Configuration;
+    using SexyFishHorse.CitiesSkylines.Logger;
 
     public class OptionsPanelManager : IOptionsPanelManager
     {
         private readonly ILogger logger;
+
+        private readonly PositionService positionService;
 
         public OptionsPanelManager(ILogger logger, PositionService positionService)
         {
             this.logger = logger;
             this.positionService = positionService;
         }
-
-        private readonly PositionService positionService;
 
         public IChirper Chirper { get; set; }
 
@@ -26,21 +26,22 @@
             {
                 var appearanceGroup = uiHelper.AddGroup("Appearance");
                 var behaviourGroup = uiHelper.AddGroup("Behaviour");
+                var debugGroup = uiHelper.AddGroup("Debugging");
 
-                appearanceGroup.AddCheckBox(
-                    "Hide chirper",
-                    ModConfig.Instance.GetSetting<bool>(SettingKeys.HideChirper),
-                    ToggleChirper);
+                appearanceGroup.AddCheckBox("Hide chirper", ModConfig.Instance.GetSetting<bool>(SettingKeys.HideChirper), ToggleChirper);
                 appearanceGroup.AddCheckBox(
                     "Make Chirper draggable (hold ctrl + left mouse button)",
                     ModConfig.Instance.GetSetting<bool>(SettingKeys.Draggable),
                     ToggleDraggable);
+                appearanceGroup.AddSpace(10);
                 appearanceGroup.AddButton("Reset Chirper position", ResetPosition);
 
                 behaviourGroup.AddCheckBox(
                     "Filter non-important messages",
                     ModConfig.Instance.GetSetting<bool>(SettingKeys.FilterMessages),
                     ToggleFilter);
+
+                debugGroup.AddCheckBox("Enable logging", ModConfig.Instance.GetSetting<bool>(SettingKeys.EnableLogging), ToggleLogging);
             }
             catch (Exception ex)
             {
@@ -97,6 +98,12 @@
             {
                 logger.LogException(ex);
             }
+        }
+
+        private void ToggleLogging(bool loggingEnabled)
+        {
+            ((BirdcageLogger)BirdcageLogger.Instance).LoggingEnabled = loggingEnabled;
+            ModConfig.Instance.SaveSetting(SettingKeys.EnableLogging, loggingEnabled);
         }
     }
 }
