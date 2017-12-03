@@ -20,7 +20,7 @@
 
         public IChirper Chirper { get; set; }
 
-        public void ConfigureOptionsPanel(IStronglyTypedUiHelper uiHelper)
+        public void ConfigureOptionsPanel(IStronglyTypedUIHelper uiHelper)
         {
             try
             {
