@@ -1,7 +1,6 @@
 ﻿namespace SexyFishHorse.CitiesSkylines.Birdcage
 {
     using System;
-    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using ColossalFramework.UI;
     using ICities;
@@ -39,15 +38,8 @@
             positionService = new PositionService();
 
             OptionsPanelManager = new OptionsPanelManager(logger, positionService);
-        }
 
-        [SuppressMessage("ReSharper", "StyleCop.SA1121", Justification = "Referencing Unity object class.")]
-        public UIButton ChirpButton
-        {
-            get
-            {
-                return chirpButton ?? (chirpButton = UnityObject.FindObjectsOfType<UIButton>().FirstOrDefault(x => x.name == "Zone"));
-            }
+            Debug.Log("REBUILT");
         }
 
         public override string Description
@@ -74,6 +66,7 @@
             {
                 chirperWrapper = chirper;
                 ((OptionsPanelManager)OptionsPanelManager).Chirper = chirper;
+                chirpButton = UnityObject.FindObjectsOfType<UIButton>().FirstOrDefault(x => x.name == "Zone");
             }
             catch (Exception ex)
             {
@@ -115,7 +108,6 @@
                 Initialize();
 
                 inputService.Update();
-
                 if (ChirpPanel.instance == null)
                 {
                     return;
@@ -211,9 +203,9 @@
 
             ChirperUtils.CollapseChirperInstantly();
             dragging = true;
-            if (ChirpButton != null)
+            if (chirpButton != null)
             {
-                ChirpButton.isEnabled = false;
+                chirpButton.isEnabled = false;
             }
         }
 
@@ -230,9 +222,9 @@
             positionService.UpdateChirperAnchor();
             positionService.SaveChirperPosition();
 
-            if (ChirpButton != null)
+            if (chirpButton != null)
             {
-                ChirpButton.isEnabled = true;
+                chirpButton.isEnabled = true;
             }
         }
     }
