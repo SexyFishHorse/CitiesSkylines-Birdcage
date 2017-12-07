@@ -35,13 +35,11 @@
         {
             logger = BirdcageLogger.Instance;
 
-            filterService = new FilterService(new ChirpPanelWrapper(), new MessageManagerWrapper());
+            filterService = new FilterService(new ChirpPanelWrapper(), logger, new MessageManagerWrapper());
             inputService = new InputService();
             positionService = new PositionService();
 
             OptionsPanelManager = new OptionsPanelManager(logger, positionService);
-
-            Debug.Log("REBUILT");
         }
 
         public override string Description

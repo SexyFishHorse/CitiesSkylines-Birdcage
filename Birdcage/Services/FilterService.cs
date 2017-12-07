@@ -5,6 +5,7 @@
     using ICities;
     using SexyFishHorse.CitiesSkylines.Birdcage.Wrappers;
     using UnityEngine;
+    using ILogger = SexyFishHorse.CitiesSkylines.Logger.ILogger;
 
     public class FilterService
     {
@@ -51,13 +52,16 @@
 
         private readonly IChirpPanelWrapper chirpPanel;
 
+        private readonly ILogger logger;
+
         private readonly IMessageManagerWrapper messageManager;
 
         private readonly ICollection<IChirperMessage> messagesToRemove = new HashSet<IChirperMessage>();
 
-        public FilterService(IChirpPanelWrapper chirpPanel, IMessageManagerWrapper messageManager)
+        public FilterService(IChirpPanelWrapper chirpPanel, ILogger logger, IMessageManagerWrapper messageManager)
         {
             this.chirpPanel = chirpPanel;
+            this.logger = logger;
             this.messageManager = messageManager;
         }
 
@@ -71,6 +75,8 @@
 
         public void HandleNewMessage(IChirperMessage message)
         {
+            logger.Info("New message: " + message.text);
+
             var citizenMessage = message as CitizenMessage;
             if (citizenMessage == null)
             {
@@ -81,6 +87,8 @@
             {
                 return;
             }
+
+            logger.Info("Message marked for removal");
 
             MessagesToRemove.Add(message);
             chirpPanel.RemoveNotificationSound();
@@ -93,6 +101,8 @@
                 return;
             }
 
+            logger.Info("Removing pending messages");
+
             chirpPanel.CollapsePanel();
 
             foreach (var chirperMessage in MessagesToRemove)
@@ -100,10 +110,10 @@
                 messageManager.DeleteMessage(chirperMessage);
             }
 
+            MessagesToRemove.Clear();
+
             chirpPanel.SynchronizeMessages();
             chirpPanel.SetNotificationSound(notificationSound);
-
-            MessagesToRemove.Clear();
         }
     }
 }
