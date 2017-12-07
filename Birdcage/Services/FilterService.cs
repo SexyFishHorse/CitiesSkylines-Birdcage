@@ -1,8 +1,9 @@
-﻿namespace SexyFishHorse.CitiesSkylines.Birdcage
+﻿namespace SexyFishHorse.CitiesSkylines.Birdcage.Services
 {
     using System.Collections.Generic;
     using System.Linq;
     using ICities;
+    using SexyFishHorse.CitiesSkylines.Birdcage.Wrappers;
     using UnityEngine;
 
     public class FilterService
@@ -48,7 +49,25 @@
             LocaleID.FOOTBALLCHIRP_WIN,
         };
 
-        private readonly HashSet<IChirperMessage> messagesToRemove = new HashSet<IChirperMessage>();
+        private readonly IChirpPanelWrapper chirpPanel;
+
+        private readonly IMessageManagerWrapper messageManager;
+
+        private readonly ICollection<IChirperMessage> messagesToRemove = new HashSet<IChirperMessage>();
+
+        public FilterService(IChirpPanelWrapper chirpPanel, IMessageManagerWrapper messageManager)
+        {
+            this.chirpPanel = chirpPanel;
+            this.messageManager = messageManager;
+        }
+
+        public ICollection<IChirperMessage> MessagesToRemove
+        {
+            get
+            {
+                return messagesToRemove;
+            }
+        }
 
         public void HandleNewMessage(IChirperMessage message)
         {
@@ -63,27 +82,28 @@
                 return;
             }
 
-            messagesToRemove.Add(message);
-            ChirpPanel.instance.m_NotificationSound = null;
+            MessagesToRemove.Add(message);
+            chirpPanel.RemoveNotificationSound();
         }
 
         public void RemovePendingMessages(AudioClip notificationSound)
         {
-            if (messagesToRemove.Any() == false)
+            if (MessagesToRemove.Any() == false)
             {
                 return;
             }
 
-            ChirperUtils.CollapseChirperInstantly();
+            chirpPanel.CollapsePanel();
 
-            foreach (var chirperMessage in messagesToRemove)
+            foreach (var chirperMessage in MessagesToRemove)
             {
-                MessageManager.instance.DeleteMessage(chirperMessage);
+                messageManager.DeleteMessage(chirperMessage);
             }
 
-            ChirpPanel.instance.SynchronizeMessages();
-            ChirpPanel.instance.m_NotificationSound = notificationSound;
-            messagesToRemove.Clear();
+            chirpPanel.SynchronizeMessages();
+            chirpPanel.SetNotificationSound(notificationSound);
+
+            MessagesToRemove.Clear();
         }
     }
 }

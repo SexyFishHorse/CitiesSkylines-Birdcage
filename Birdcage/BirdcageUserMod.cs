@@ -4,6 +4,8 @@
     using System.Linq;
     using ColossalFramework.UI;
     using ICities;
+    using SexyFishHorse.CitiesSkylines.Birdcage.Services;
+    using SexyFishHorse.CitiesSkylines.Birdcage.Wrappers;
     using SexyFishHorse.CitiesSkylines.Infrastructure;
     using UnityEngine;
     using ILogger = SexyFishHorse.CitiesSkylines.Logger.ILogger;
@@ -33,7 +35,7 @@
         {
             logger = BirdcageLogger.Instance;
 
-            filterService = new FilterService();
+            filterService = new FilterService(new ChirpPanelWrapper(), new MessageManagerWrapper());
             inputService = new InputService();
             positionService = new PositionService();
 
