@@ -60,14 +60,16 @@
 
             if (AllowedMessages.Contains(citizenMessage.m_messageID))
             {
-                messagesToRemove.Add(message);
-                ChirpPanel.instance.m_NotificationSound = null;
+                return;
             }
+
+            messagesToRemove.Add(message);
+            ChirpPanel.instance.m_NotificationSound = null;
         }
 
         public void RemovePendingMessages(AudioClip notificationSound)
         {
-            if (messagesToRemove.Any())
+            if (messagesToRemove.Any() == false)
             {
                 return;
             }
