@@ -1,7 +1,5 @@
 ﻿namespace SexyFishHorse.CitiesSkylines.Birdcage.UnitTests.Services
 {
-    using System;
-    using System.Threading.Tasks;
     using FluentAssertions;
     using ICities;
     using Moq;
@@ -100,6 +98,17 @@
         public class TheRemovePendingMessagesMethod : TheFilterServiceClass
         {
             [Fact]
+            public void ShouldClearPendingMessages()
+            {
+                var instance = fixture.Create<FilterService>();
+                instance.MessagesToRemove.Add(fixture.Create<IChirperMessage>());
+
+                instance.RemovePendingMessages(new AudioClip());
+
+                instance.MessagesToRemove.Should().HaveCount(0, "because all messages should have been removed");
+            }
+
+            [Fact]
             public void ShouldNotCollapsePanelIfThereAreNoMessagesToRemove()
             {
                 var chirpPanel = fixture.Freeze<Mock<IChirpPanelWrapper>>();
@@ -108,22 +117,6 @@
                 instance.RemovePendingMessages(new AudioClip());
 
                 chirpPanel.Verify(x => x.CollapsePanel(), Times.Never);
-            }
-
-            [Theory]
-            [InlineData(1)]
-            [InlineData(2)]
-            [InlineData(3)]
-            public void ShouldCollapsePanelIfThereAreMessagesToRemove(int numberOfMessages)
-            {
-                var chirpPanel = fixture.Freeze<Mock<IChirpPanelWrapper>>();
-
-                var instance = fixture.Create<FilterService>();
-                instance.MessagesToRemove.AddMany(fixture.Create<IChirperMessage>, numberOfMessages);
-
-                instance.RemovePendingMessages(new AudioClip());
-
-                chirpPanel.Verify(x => x.CollapsePanel(), Times.Once);
             }
 
             [Theory]
@@ -142,33 +135,6 @@
                 messageManager.Verify(x => x.DeleteMessage(It.IsAny<IChirperMessage>()), Times.Exactly(numberOfMessages));
             }
 
-            [Fact]
-            public void ShouldClearPendingMessages()
-            {
-                var instance = fixture.Create<FilterService>();
-                instance.MessagesToRemove.Add(fixture.Create<IChirperMessage>());
-
-                instance.RemovePendingMessages(new AudioClip());
-
-                instance.MessagesToRemove.Should().HaveCount(0, "because all messages should have been removed");
-            }
-
-            [Theory]
-            [InlineData(1)]
-            [InlineData(2)]
-            [InlineData(3)]
-            public void ShouldSynchronizeMessagesOnce(int numberOfMessages)
-            {
-                var chirpPanel = fixture.Freeze<Mock<IChirpPanelWrapper>>();
-
-                var instance = fixture.Create<FilterService>();
-                instance.MessagesToRemove.AddMany(fixture.Create<IChirperMessage>, numberOfMessages);
-
-                instance.RemovePendingMessages(new AudioClip());
-
-                chirpPanel.Verify(x => x.SynchronizeMessages(), Times.Once);
-            }
-
             [Theory]
             [InlineData(1)]
             [InlineData(2)]
@@ -185,6 +151,22 @@
                 instance.RemovePendingMessages(notificationSound);
 
                 chirpPanel.Verify(x => x.SetNotificationSound(notificationSound), Times.Once);
+            }
+
+            [Theory]
+            [InlineData(1)]
+            [InlineData(2)]
+            [InlineData(3)]
+            public void ShouldSynchronizeMessagesOnce(int numberOfMessages)
+            {
+                var chirpPanel = fixture.Freeze<Mock<IChirpPanelWrapper>>();
+
+                var instance = fixture.Create<FilterService>();
+                instance.MessagesToRemove.AddMany(fixture.Create<IChirperMessage>, numberOfMessages);
+
+                instance.RemovePendingMessages(new AudioClip());
+
+                chirpPanel.Verify(x => x.SynchronizeMessages(numberOfMessages), Times.Once);
             }
         }
     }

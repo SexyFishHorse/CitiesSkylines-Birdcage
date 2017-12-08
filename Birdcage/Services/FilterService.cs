@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using System.Linq;
+    using ColossalFramework.UI;
     using ICities;
     using SexyFishHorse.CitiesSkylines.Birdcage.Wrappers;
     using UnityEngine;
@@ -103,17 +104,20 @@
 
             logger.Info("Removing pending messages");
 
-            chirpPanel.CollapsePanel();
-
             foreach (var chirperMessage in MessagesToRemove)
             {
                 messageManager.DeleteMessage(chirperMessage);
             }
 
-            MessagesToRemove.Clear();
-
-            chirpPanel.SynchronizeMessages();
+            chirpPanel.SynchronizeMessages(messagesToRemove.Count);
             chirpPanel.SetNotificationSound(notificationSound);
+
+            MessagesToRemove.Clear();
+        }
+
+        public void SetCounter(UILabel counterLabel)
+        {
+            chirpPanel.SetCounter(counterLabel);
         }
     }
 }

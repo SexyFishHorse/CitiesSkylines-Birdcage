@@ -67,6 +67,9 @@
                 chirperWrapper = chirper;
                 ((OptionsPanelManager)OptionsPanelManager).Chirper = chirper;
                 chirpButton = UnityObject.FindObjectsOfType<UIButton>().FirstOrDefault(x => x.name == "Zone");
+
+                var counterLabel = UnityObject.FindObjectsOfType<UILabel>().FirstOrDefault(x => x.name == "Counter");
+                filterService.SetCounter(counterLabel);
             }
             catch (Exception ex)
             {
