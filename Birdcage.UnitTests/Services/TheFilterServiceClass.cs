@@ -1,10 +1,10 @@
 ﻿namespace SexyFishHorse.CitiesSkylines.Birdcage.UnitTests.Services
 {
+    using AutoFixture;
+    using AutoFixture.AutoMoq;
     using FluentAssertions;
     using ICities;
     using Moq;
-    using Ploeh.AutoFixture;
-    using Ploeh.AutoFixture.AutoMoq;
     using SexyFishHorse.CitiesSkylines.Birdcage.Services;
     using SexyFishHorse.CitiesSkylines.Birdcage.Wrappers;
     using UnityEngine;
