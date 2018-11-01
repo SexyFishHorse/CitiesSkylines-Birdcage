@@ -1,10 +1,10 @@
 ﻿namespace SexyFishHorse.CitiesSkylines.Birdcage.Services
 {
-    using System.Collections.Generic;
-    using System.Linq;
     using ColossalFramework.UI;
     using ICities;
     using SexyFishHorse.CitiesSkylines.Birdcage.Wrappers;
+    using System.Collections.Generic;
+    using System.Linq;
     using UnityEngine;
     using ILogger = SexyFishHorse.CitiesSkylines.Logger.ILogger;
 
@@ -19,11 +19,12 @@
             LocaleID.CHIRP_FIRE_HAZARD,
             LocaleID.CHIRP_HIGH_CRIME,
             LocaleID.CHIRP_INDUSTRIAL_DEMAND,
+            LocaleID.CHIRP_LAUNCH,
+            LocaleID.CHIRP_LAUNCH_PREPARATION,
             LocaleID.CHIRP_LOW_HAPPINESS,
             LocaleID.CHIRP_LOW_HEALTH,
             LocaleID.CHIRP_MILESTONE_REACHED,
             LocaleID.CHIRP_NEED_MORE_PARKS,
-            LocaleID.CHIRP_NEW_MAP_TILE,
             LocaleID.CHIRP_NOISEPOLLUTION,
             LocaleID.CHIRP_NO_ELECTRICITY,
             LocaleID.CHIRP_NO_HEALTHCARE,
@@ -34,7 +35,9 @@
             LocaleID.CHIRP_POLLUTION,
             LocaleID.CHIRP_RESIDENTIAL_DEMAND,
             LocaleID.CHIRP_SEWAGE,
+            LocaleID.CHIRP_SURVIVORFOUND,
             LocaleID.CHIRP_TRASH_PILING_UP,
+            LocaleID.CHIRP_UPGRADE_FESTIVALAREA,
             LocaleID.EDITORCHIRPER_REQUIREMENTS,
             LocaleID.EDITORCHIRPER_REQUIREMENTS_FERTILITY,
             LocaleID.EDITORCHIRPER_REQUIREMENTS_FOREST,
@@ -83,6 +86,8 @@
             {
                 return;
             }
+
+            logger.Info("Message id: " + citizenMessage.m_messageID);
 
             if (AllowedMessages.Contains(citizenMessage.m_messageID))
             {

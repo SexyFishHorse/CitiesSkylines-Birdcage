@@ -48,6 +48,13 @@
 
         public void SynchronizeMessages(int numberOfRemovedMessages)
         {
+            if (Panel == null)
+            {
+                BirdcageLogger.Instance.Error("Panel is null");
+
+                return;
+            }
+
             Panel.SynchronizeMessages();
 
             if (counter == null)
