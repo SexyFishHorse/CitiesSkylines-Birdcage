@@ -7,3 +7,11 @@ Visit the [Steam Workshop page](http://steamcommunity.com/sharedfiles/filedetail
 
 ![Preview Image(PreviewImage.png)]
 
+# How to build
+
+You need to first add an environmental variable called `CS_GAME_DIRECTORY` which points to where Cities Skylines is installed.
+E.g. `"c:\steam\steamapps\common\Cities_Skylines"`
+
+# How to debug
+
+When you build the project it will automatically copy the files to the mods folder. In order for that procedure to work you need to add an environmental variable called `CS_ADDONS_DIRECTORY` which points to the "Addons" folder. E.g. `"%LOCALAPPDATA%\Colossal Order\Cities_Skylines\Addons"`

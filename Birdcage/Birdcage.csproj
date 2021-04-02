@@ -35,25 +35,23 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>$(CS_GAME_DIRECTORY)\Assembly-CSharp.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Assembly-CSharp.1.10.0.3\lib\net35\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="ColossalManaged, Version=0.3.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>$(CS_GAME_DIRECTORY)\ColossalManaged.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="ColossalManaged, Version=0.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ColossalManaged.1.10.0.3\lib\net35\ColossalManaged.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="ICities, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>$(CS_GAME_DIRECTORY)\ICities.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="ICities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ICities.1.10.0.3\lib\net35\ICities.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="SexyFishHorse.CitiesSkylines.Infrastructure, Version=1.0.7730.3252, Culture=neutral, PublicKeyToken=null">
-      <HintPath>$(CS_GAME_DIRECTORY)\SexyFishHorse.CitiesSkylines.Infrastructure.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="SexyFishHorse.CitiesSkylines.Infrastructure, Version=1.0.7730.3252, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SexyFishHorse.CitiesSkylines.Infrastructure.1.0.7730.3252\lib\net35\SexyFishHorse.CitiesSkylines.Infrastructure.dll</HintPath>
     </Reference>
-    <Reference Include="SexyFishHorse.CitiesSkylines.Logger, Version=1.0.7731.32671, Culture=neutral, PublicKeyToken=null">
-      <HintPath>$(CS_GAME_DIRECTORY)\SexyFishHorse.CitiesSkylines.Logger.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="SexyFishHorse.CitiesSkylines.Logger, Version=1.0.6721.43148, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SexyFishHorse.CitiesSkylines.Logger.1.0.6721.43148\lib\net35\SexyFishHorse.CitiesSkylines.Logger.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -61,9 +59,9 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>$(CS_GAME_DIRECTORY)\UnityEngine.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UnityEngine.1.10.0.3\lib\net35\UnityEngine.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -87,9 +85,11 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>rmdir /s /q "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)"
-mkdir "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)"
-copy "$(TargetDir)" "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)"</PostBuildEvent>
+    <PostBuildEvent>
+      rmdir /s /q "$(CS_ADDONS_DIRECTORY)\Mods\$(SolutionName)"
+      mkdir "$(CS_ADDONS_DIRECTORY)\Mods\$(SolutionName)"
+      copy "$(TargetDir)" "$(CS_ADDONS_DIRECTORY)\Mods\$(SolutionName)"
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
