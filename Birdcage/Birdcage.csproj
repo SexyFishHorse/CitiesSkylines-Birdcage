@@ -35,23 +35,25 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Assembly-CSharp.1.11.0.3\lib\net35\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>$(CS_GAME_DIRECTORY)\Assembly-CSharp.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="ColossalManaged, Version=0.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ColossalManaged.1.11.0.3\lib\net35\ColossalManaged.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="ColossalManaged, Version=0.3.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>$(CS_GAME_DIRECTORY)\ColossalManaged.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="ICities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ICities.1.11.0.3\lib\net35\ICities.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="ICities, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>$(CS_GAME_DIRECTORY)\ICities.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="SexyFishHorse.CitiesSkylines.Infrastructure, Version=1.0.6722.17, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SexyFishHorse.CitiesSkylines.Infrastructure.1.0.6722.17\lib\net35\SexyFishHorse.CitiesSkylines.Infrastructure.dll</HintPath>
+    <Reference Include="SexyFishHorse.CitiesSkylines.Infrastructure, Version=1.0.7730.3252, Culture=neutral, PublicKeyToken=null">
+      <HintPath>$(CS_GAME_DIRECTORY)\SexyFishHorse.CitiesSkylines.Infrastructure.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="SexyFishHorse.CitiesSkylines.Logger, Version=1.0.6721.43148, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SexyFishHorse.CitiesSkylines.Logger.1.0.6721.43148\lib\net35\SexyFishHorse.CitiesSkylines.Logger.dll</HintPath>
+    <Reference Include="SexyFishHorse.CitiesSkylines.Logger, Version=1.0.7731.32671, Culture=neutral, PublicKeyToken=null">
+      <HintPath>$(CS_GAME_DIRECTORY)\SexyFishHorse.CitiesSkylines.Logger.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -59,9 +61,9 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnityEngine.1.11.0.3\lib\net35\UnityEngine.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>$(CS_GAME_DIRECTORY)\UnityEngine.dll</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
